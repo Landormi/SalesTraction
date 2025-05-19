@@ -3,17 +3,12 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
-import { Pool } from 'pg'; // PostgreSQL client
+import mysql from 'mysql2/promise'; // MariaDB client
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// PostgreSQL connection pool
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
 
 // Middleware
 app.use(cors());
@@ -23,35 +18,53 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Routes
 app.post('/api/auth/signup', async (req, res) => {
   const { email, password, role } = req.body;
+  let connection;
   try {
-    const result = await pool.query(
-      'INSERT INTO user_ (email, password_hash, user_type) VALUES ($1, $2, $3) RETURNING id_user',
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
+    const [result] = await connection.execute(
+      'INSERT INTO user_ (email, password_hash, user_type) VALUES (?, ?, ?)',
       [email, password, role]
     );
-    res.status(201).json({ message: 'User created', userId: result.rows[0].id_user });
+    res.status(201).json({ message: 'User created', userId: result.insertId });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error creating user' });
+  } finally {
+    if (connection) await connection.end();
   }
 });
 
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
+  let connection;
   try {
-    const result = await pool.query(
-      'SELECT id_user FROM user_ WHERE email = $1 AND password_hash = $2',
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
+    const [rows] = await connection.execute(
+      'SELECT id_user FROM user_ WHERE email = ? AND password_hash = ?',
       [email, password]
     );
-    if (result.rows.length === 0) {
+    if (rows.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-    const userId = result.rows[0].id_user;
+    const userId = rows[0].id_user;
     const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '1h' });
     const refreshToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ accessToken, refreshToken });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error logging in' });
+  } finally {
+    if (connection) await connection.end();
   }
 });
 
@@ -82,120 +95,181 @@ app.get('/api/auth/linkedin/callback', (req, res) => {
 
 app.get('/api/offers', async (req, res) => {
   const { status, startup_id } = req.query;
+  let connection;
   try {
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
     let query = 'SELECT * FROM offre';
     const params = [];
     if (status || startup_id) {
       query += ' WHERE';
       if (status) {
         params.push(status);
-        query += ` status = $${params.length}`;
+        query += ` status = ?`;
       }
       if (startup_id) {
         if (params.length > 0) query += ' AND';
         params.push(startup_id);
-        query += ` id_startup = $${params.length}`;
+        query += ` id_startup = ?`;
       }
     }
-    const result = await pool.query(query, params);
-    res.json(result.rows);
+    const [rows] = await connection.execute(query, params);
+    res.json(rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error fetching offers' });
+  } finally {
+    if (connection) await connection.end();
   }
 });
 
 app.post('/api/offers', async (req, res) => {
   const { title, description, startupId } = req.body;
+  let connection;
   try {
-    const result = await pool.query(
-      'INSERT INTO offre (title, description, id_startup, status, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING id_offre',
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
+    const [result] = await connection.execute(
+      'INSERT INTO offre (title, description, id_startup, status, created_at) VALUES (?, ?, ?, ?, NOW())',
       [title, description, startupId, 'open']
     );
-    res.status(201).json({ message: 'Offer created', offerId: result.rows[0].id_offre });
+    res.status(201).json({ message: 'Offer created', offerId: result.insertId });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error creating offer' });
+  } finally {
+    if (connection) await connection.end();
   }
 });
 
 app.get('/api/offers/:id', async (req, res) => {
   const { id } = req.params;
+  let connection;
   try {
-    const result = await pool.query('SELECT * FROM offre WHERE id_offre = $1', [id]);
-    if (result.rows.length === 0) {
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
+    const [rows] = await connection.execute('SELECT * FROM offre WHERE id_offre = ?', [id]);
+    if (rows.length === 0) {
       return res.status(404).json({ message: 'Offer not found' });
     }
-    res.json(result.rows[0]);
+    res.json(rows[0]);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error fetching offer' });
+  } finally {
+    if (connection) await connection.end();
   }
 });
 
 app.put('/api/offers/:id', async (req, res) => {
   const { id } = req.params;
   const { title, description, status } = req.body;
+  let connection;
   try {
-    const result = await pool.query(
-      'UPDATE offre SET title = COALESCE($1, title), description = COALESCE($2, description), status = COALESCE($3, status) WHERE id_offre = $4',
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
+    const [result] = await connection.execute(
+      'UPDATE offre SET title = COALESCE(?, title), description = COALESCE(?, description), status = COALESCE(?, status) WHERE id_offre = ?',
       [title, description, status, id]
     );
-    if (result.rowCount === 0) {
+    if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Offer not found' });
     }
     res.json({ message: 'Offer updated' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error updating offer' });
+  } finally {
+    if (connection) await connection.end();
   }
 });
 
 // Applications Routes
 app.post('/api/applications', async (req, res) => {
   const { offerId, userId, cvUrl, message } = req.body;
+  let connection;
   try {
-    const result = await pool.query(
-      'INSERT INTO application (id_offre, id_user, cv_url, message, status, created_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING id_application',
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
+    const [result] = await connection.execute(
+      'INSERT INTO application (id_offre, id_user, cv_url, message, status, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
       [offerId, userId, cvUrl, message, 'pending']
     );
-    res.status(201).json({ message: 'Application submitted', applicationId: result.rows[0].id_application });
+    res.status(201).json({ message: 'Application submitted', applicationId: result.insertId });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error submitting application' });
+  } finally {
+    if (connection) await connection.end();
   }
 });
 
 app.get('/api/applications', async (req, res) => {
   const { user_id, offer_id } = req.query;
+  let connection;
   try {
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
     let query = 'SELECT * FROM application';
     const params = [];
     if (user_id || offer_id) {
       query += ' WHERE';
       if (user_id) {
         params.push(user_id);
-        query += ` id_user = $${params.length}`;
+        query += ` id_user = ?`;
       }
       if (offer_id) {
         if (params.length > 0) query += ' AND';
         params.push(offer_id);
-        query += ` id_offre = $${params.length}`;
+        query += ` id_offre = ?`;
       }
     }
-    const result = await pool.query(query, params);
-    res.json(result.rows);
+    const [rows] = await connection.execute(query, params);
+    res.json(rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error fetching applications' });
+  } finally {
+    if (connection) await connection.end();
   }
 });
 
 // Admin Routes
 app.get('/api/admin/startups/unverified', async (req, res) => {
+  let connection;
   try {
-    const result = await pool.query('SELECT * FROM startup WHERE is_verified = false');
-    res.json(result.rows.map(s => ({
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
+    const [rows] = await connection.execute('SELECT * FROM startup WHERE is_verified = false');
+    res.json(rows.map(s => ({
       id: s.id_startup,
       name: s.name,
       email: s.email,
@@ -204,41 +278,61 @@ app.get('/api/admin/startups/unverified', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error fetching unverified startups' });
+  } finally {
+    if (connection) await connection.end();
   }
 });
 
 app.post('/api/admin/startups/:id/verify', async (req, res) => {
   const { id } = req.params;
+  let connection;
   try {
-    const result = await pool.query(
-      'UPDATE startup SET is_verified = true WHERE id_startup = $1',
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
+    const [result] = await connection.execute(
+      'UPDATE startup SET is_verified = true WHERE id_startup = ?',
       [id]
     );
-    if (result.rowCount === 0) {
+    if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Startup not found' });
     }
     res.json({ message: 'Startup verified' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error verifying startup' });
+  } finally {
+    if (connection) await connection.end();
   }
 });
 
 app.get('/api/admin/stats', async (req, res) => {
+  let connection;
   try {
-    const usersCount = await pool.query('SELECT COUNT(*) FROM user_');
-    const startupsCount = await pool.query('SELECT COUNT(*) FROM startup');
-    const offersCount = await pool.query('SELECT COUNT(*) FROM offre');
-    const applicationsCount = await pool.query('SELECT COUNT(*) FROM application');
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
+    const [usersCount] = await connection.execute('SELECT COUNT(*) AS count FROM user_');
+    const [startupsCount] = await connection.execute('SELECT COUNT(*) AS count FROM startup');
+    const [offersCount] = await connection.execute('SELECT COUNT(*) AS count FROM offre');
+    const [applicationsCount] = await connection.execute('SELECT COUNT(*) AS count FROM application');
     res.json({
-      users: parseInt(usersCount.rows[0].count, 10),
-      startups: parseInt(startupsCount.rows[0].count, 10),
-      offers: parseInt(offersCount.rows[0].count, 10),
-      applications: parseInt(applicationsCount.rows[0].count, 10),
+      users: usersCount[0].count,
+      startups: startupsCount[0].count,
+      offers: offersCount[0].count,
+      applications: applicationsCount[0].count,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error fetching stats' });
+  } finally {
+    if (connection) await connection.end();
   }
 });
 
