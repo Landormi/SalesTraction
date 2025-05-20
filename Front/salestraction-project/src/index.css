@@ -81,3 +81,19 @@
   background-color: #db4437;
   color: white;
 }
+
+.instruction-text p {
+  color: #695C5C; /* Exemple : orange, adapte à ta couleur */
+  font-style: italic;
+}
+
+
+/* Style pour l'en-tête */
+.card.narrow h1 {
+  position: relative;
+}
+
+/* Si besoin d'ajuster l'espacement */
+.d-flex.align-items-center.mb-4 {
+  margin-bottom: 1.5rem !important;
+}

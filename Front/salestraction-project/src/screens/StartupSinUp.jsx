@@ -1,12 +1,27 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Link } from 'react-router-dom';
-import { FaLinkedin } from 'react-icons/fa';
+import { FaLinkedin,  FaArrowLeft } from 'react-icons/fa';
 
 function StartupSignUp() {
   return (
     <div className="centered-page">
       <div className="card narrow">
-        <h1 className="text-center mb-4">SALESTRACTION</h1>
+        {/* En-tête avec bouton Back borduré et titre */}
+                <div className="d-flex align-items-center mb-4">
+                <Link 
+                    to="/" 
+                    className="btn btn-outline-primary me-3 p-2 d-flex align-items-center justify-content-center back-button"
+                    style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      borderRadius: '50%',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <FaArrowLeft className="m-0" />
+                  </Link>
+                  <h1 className="mb-0 flex-grow-1 text-center">SALESTRACTION</h1>
+                </div>
 
         <form>
           {/* Champ Email */}

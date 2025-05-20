@@ -1,14 +1,29 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Link } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
-import { FaLinkedin } from 'react-icons/fa';
+import { FaLinkedin, FaArrowLeft } from 'react-icons/fa';
 
 
 function TalentLogin() {
   return (
     <div className="centered-page">
       <div className="card narrow">
-        <h1 className="text-center mb-4">SALESTRACTION</h1>
+        {/* En-tête avec bouton Back borduré et titre */}
+        <div className="d-flex align-items-center mb-4">
+        <Link 
+            to="/" 
+            className="btn btn-outline-primary me-3 p-2 d-flex align-items-center justify-content-center back-button"
+            style={{ 
+              width: '40px', 
+              height: '40px', 
+              borderRadius: '50%',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <FaArrowLeft className="m-0" />
+          </Link>
+          <h1 className="mb-0 flex-grow-1 text-center">SALESTRACTION</h1>
+        </div>
 
         <form>
           {/* Champ Email */}
@@ -31,17 +46,24 @@ function TalentLogin() {
             />
           </div>
 
-          {/* Remember Me */}
-          <div className="mb-4 form-check text-start">
-            <input 
-              type="checkbox" 
-              className="form-check-input" 
-              id="rememberMe" 
-            />
-            <label className="form-check-label" htmlFor="rememberMe">
-              Remember Me
-            </label>
+          {/* Ligne contenant Remember Me et Forgot Password */}
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <div className="form-check m-0">
+              <input 
+                type="checkbox" 
+                className="form-check-input" 
+                id="rememberMe" 
+              />
+              <label className="form-check-label" htmlFor="rememberMe">
+                Remember Me
+              </label>
+            </div>
+
+            <Link to="/forget-password" className="text-decoration-none text-primary">
+              Forgot password?
+            </Link>
           </div>
+
 
           {/* Bouton Login */}
           <button className="btn btn-primary w-100 mb-3 py-2">

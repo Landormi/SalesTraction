@@ -11,7 +11,7 @@ function TalentSignUp() {
 
         <form>
           {/* Champ Email - Sans label comme sur l'image */}
-          <div className="mb-3">
+          <div className="mb-3 text-start">
             <label className="form-label">Email</label>
             <input 
               type="email" 

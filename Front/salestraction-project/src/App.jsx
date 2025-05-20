@@ -4,6 +4,7 @@ import TalentLogin from './screens/TalentLogin'; // Ajoutez cet import
 import StartupLogin from './screens/StartupLogin'; // Ajoutez cet import
 import StartupSignUp from './screens/StartupSinUp';
 import TalentSignUp from './screens/TalentSignUp';
+import ForgetPassword from './screens/ForgetPassword';
 
 import './App.css';
 
@@ -16,6 +17,7 @@ function App() {
         <Route path="/startup-login" element={<StartupLogin />} />
         <Route path="/startup-signup" element={<StartupSignUp />} />
         <Route path="/talent-signup" element={<TalentSignUp/>} />
+        <Route path="/forget-password" element={<ForgetPassword />} />
       </Routes>
     </Router>
   );
