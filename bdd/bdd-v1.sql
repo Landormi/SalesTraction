@@ -105,7 +105,7 @@ CREATE TABLE studiant(
    birthday DATE NOT NULL,
    university VARCHAR(255) ,
    created_at DATETIME NOT NULL,
-   description TEXT NOT NULL,
+   description TEXT,
    id_document INT,
    id_user INT NOT NULL,
    PRIMARY KEY(id_studiant),

@@ -46,7 +46,7 @@ VALUES
 (NULL, '2000-10-01', 'Université A', '2023-09-01 00:00:00', 'Description étudiant 10', 11),
 ('https://linkedin.com/in/student11', '2000-11-01', 'Université A', '2023-09-01 00:00:00', 'Description étudiant 11', 12),
 (NULL, '2000-12-01', NULL, '2023-09-01 00:00:00', 'Description étudiant 12', 13),
-('https://linkedin.com/in/student13', '2001-01-01', 'Université A', '2023-09-01 00:00:00', 'Description étudiant 13', 14),
+('https://linkedin.com/in/student13', '2001-01-01', 'Université A', '2023-09-01 00:00:00', NULL, 14),
 (NULL, '2001-02-01', 'Université A', '2023-09-01 00:00:00', 'Description étudiant 14', 15),
 ('https://linkedin.com/in/student15', '2001-03-01', NULL, '2023-09-01 00:00:00', 'Description étudiant 15', 16);
 

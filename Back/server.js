@@ -62,6 +62,14 @@ app.post('/api/auth/signup/studiant', async (req, res) => {
   let connection;
   try {
     connection = await getDbConnection();
+    // Vérifie si l'email existe déjà
+    const [existing] = await connection.execute(
+      'SELECT id_user FROM user_ WHERE email = ?',
+      [email]
+    );
+    if (existing.length > 0) {
+      return res.status(409).json({ message: 'Email déjà utilisé' });
+    }
     // Création de l'utilisateur
     const [userResult] = await connection.execute(
       'INSERT INTO user_ (email, password_hash, user_type) VALUES (?, ?, ?)',
@@ -96,6 +104,14 @@ app.post('/api/auth/signup/startup', async (req, res) => {
   let connection;
   try {
     connection = await getDbConnection();
+    // Vérifie si l'email existe déjà
+    const [existing] = await connection.execute(
+      'SELECT id_user FROM user_ WHERE email = ?',
+      [email]
+    );
+    if (existing.length > 0) {
+      return res.status(409).json({ message: 'Email déjà utilisé' });
+    }
     // Création de l'utilisateur
     const [userResult] = await connection.execute(
       'INSERT INTO user_ (email, password_hash, user_type) VALUES (?, ?, ?)',
