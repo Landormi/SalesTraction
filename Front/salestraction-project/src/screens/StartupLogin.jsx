@@ -1,12 +1,13 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Link } from 'react-router-dom';
+import { FaLinkedin } from 'react-icons/fa';
 
 function StartupLogin() {
   return (
     <div className="centered-page">
-      <div className="card">
+      <div className="card narrow">
         <h1 className="text-center mb-4">SALESTRACTION</h1>
-        
+
         <form>
           {/* Champ Email */}
           <div className="mb-3 text-start">
@@ -48,14 +49,12 @@ function StartupLogin() {
           {/* Social Login - LinkedIn */}
           <div className="text-center mb-3">
             <p className="separator">Login with LinkedIn</p>
-            <div className="d-flex justify-content-center">
-              <button 
+            <button 
                 type="button" 
-                className="btn btn-outline-primary px-4"
-              >
-                LinkedIn
-              </button>
-            </div>
+                className="btn btn-outline-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2"
+                >
+                <FaLinkedin size={25} /> SignUp with LinkedIn
+                </button>
           </div>
 
           {/* Lien Sign Up */}
@@ -70,4 +69,3 @@ function StartupLogin() {
 }
 
 export default StartupLogin;
-

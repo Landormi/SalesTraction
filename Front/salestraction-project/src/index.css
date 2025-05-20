@@ -1,4 +1,4 @@
-/* Containers centrés avec fond clair */
+/* ==== Containers centrés (login, signup, loading) ==== */
 .centered-page {
   display: flex;
   justify-content: center;
@@ -8,23 +8,28 @@
   padding: 20px;
 }
 
-/* Cartes génériques (utilisées pour login, loading, etc.) */
+/* ==== Cartes de formulaire (login, signup, loading, etc.) ==== */
 .card {
   background: white;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 2rem;
   width: 100%;
-  max-width: 800px; /* S'adapte à loading/login */
+  max-width: 800px; /* Peut être réduit à 450px pour des formulaires simples */
 }
 
+.card.narrow {
+  max-width: 450px;
+}
+
+/* Titres des cartes */
 .card h1 {
   color: #2c3e50;
   font-weight: 700;
   letter-spacing: 1px;
 }
 
-/* Séparateur avec traits */
+/* ==== Séparateur horizontal avec du texte ==== */
 .separator {
   color: #6c757d;
   position: relative;
@@ -49,13 +54,14 @@
   right: 0;
 }
 
-/* Champs de formulaire */
+/* ==== Champs de formulaire ==== */
 .form-control {
   padding: 10px 15px;
   border-radius: 8px;
+  margin-bottom: 1rem;
 }
 
-/* Boutons stylés */
+/* ==== Boutons stylés ==== */
 .btn-outline-primary {
   border-color: #0a66c2;
   color: #0a66c2;
