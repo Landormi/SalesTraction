@@ -1,6 +1,3 @@
 # SalesTraction Backend
 
-faire un 
-```bash
-npm i
-```
+faire un ```npm i``` pour installer les dépadance pour le dev

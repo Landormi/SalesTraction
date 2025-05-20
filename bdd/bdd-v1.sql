@@ -30,7 +30,7 @@ CREATE TABLE user_type(
 );
 
 CREATE TABLE user_(
-   id_user INT Auto_increment,
+   id_user INT AUTO_INCREMENT Auto_increment,
    email VARCHAR(320)  NOT NULL,
    password_hash VARCHAR(48)  NOT NULL COMMENT "(stocké dans Cognito, ici uniquement référence éventuelle)",
    user_type VARCHAR(48)  NOT NULL,
@@ -39,11 +39,11 @@ CREATE TABLE user_(
 );
 
 CREATE TABLE startup(
-   id_startup INT,
-   linkedin_url VARCHAR(255)  NOT NULL,
+   id_startup INT AUTO_INCREMENT,
+   linkedin_url VARCHAR(255) ,
    name VARCHAR(255)  NOT NULL,
    siret VARCHAR(14)  NOT NULL,
-   created_at VARCHAR(9)  NOT NULL,
+   created_at DATETIME NOT NULL,
    status VARCHAR(9)  NOT NULL,
    id_user INT NOT NULL,
    PRIMARY KEY(id_startup),
@@ -53,7 +53,7 @@ CREATE TABLE startup(
 );
 
 CREATE TABLE offre(
-   id_offre INT Auto_increment,
+   id_offre INT AUTO_INCREMENT Auto_increment,
    title VARCHAR(255)  NOT NULL,
    description TEXT NOT NULL,
    price_range VARCHAR(50)  NOT NULL,
@@ -64,21 +64,23 @@ CREATE TABLE offre(
 );
 
 CREATE TABLE Document(
-   id_document INT Auto_increment,
+   id_document INT AUTO_INCREMENT Auto_increment,
    name VARCHAR(255)  NOT NULL,
    path VARCHAR(255)  NOT NULL,
    upload_date DATETIME NOT NULL,
+   id_startup INT,
    document_category VARCHAR(255)  NOT NULL,
    type_document VARCHAR(255)  NOT NULL,
    id_offre INT,
    PRIMARY KEY(id_document),
+   FOREIGN KEY(id_startup) REFERENCES startup(id_startup),
    FOREIGN KEY(document_category) REFERENCES document_category(document_category),
    FOREIGN KEY(type_document) REFERENCES document_type(type_document),
    FOREIGN KEY(id_offre) REFERENCES offre(id_offre)
 );
 
 CREATE TABLE conversation(
-   id_conversation INT Auto_increment,
+   id_conversation INT AUTO_INCREMENT Auto_increment,
    id_user_user2 INT NOT NULL,
    id_user INT NOT NULL,
    PRIMARY KEY(id_conversation),
@@ -87,7 +89,7 @@ CREATE TABLE conversation(
 );
 
 CREATE TABLE message(
-   id_message INT Auto_increment,
+   id_message INT AUTO_INCREMENT Auto_increment,
    send_at DATETIME NOT NULL,
    content TEXT NOT NULL,
    id_user INT NOT NULL,
@@ -98,15 +100,16 @@ CREATE TABLE message(
 );
 
 CREATE TABLE studiant(
-   id_studiant INT,
-   linkedin_url VARCHAR(255)  NOT NULL,
+   id_studiant INT AUTO_INCREMENT,
+   linkedin_url VARCHAR(255) ,
    birthday DATE NOT NULL,
-   university VARCHAR(255)  NOT NULL,
-   created_at DATE NOT NULL,
-   description TEXT NOT NULL,
-   id_document INT NOT NULL,
+   university VARCHAR(255) ,
+   created_at DATETIME NOT NULL,
+   description TEXT,
+   id_document INT,
    id_user INT NOT NULL,
    PRIMARY KEY(id_studiant),
+   UNIQUE(id_document),
    UNIQUE(id_user),
    FOREIGN KEY(id_document) REFERENCES Document(id_document),
    FOREIGN KEY(id_user) REFERENCES user_(id_user)
@@ -128,7 +131,7 @@ CREATE TABLE target_offre(
    FOREIGN KEY(target_customer) REFERENCES target_customer(target_customer)
 );
 
-CREATE TABLE target_trudiant(
+CREATE TABLE target_studiant(
    id_studiant INT,
    target_customer VARCHAR(50) ,
    PRIMARY KEY(id_studiant, target_customer),
