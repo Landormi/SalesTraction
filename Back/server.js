@@ -48,75 +48,75 @@ function generateToken(user) {
 
 // Routes
 
-// // Inscription pour un étudiant
-// app.post('/api/auth/signup/studiant', async (req, res) => {
-//   let { email, password, linkedin_url, birthday, university, description } = req.body;
-//   // Sanitize inputs
-//   email = sanitizeString(email);
-//   password = sanitizeString(password);
-//   linkedin_url = sanitizeString(linkedin_url);
-//   birthday = sanitizeString(birthday);
-//   university = sanitizeString(university);
-//   description = sanitizeString(description);
+// Inscription pour un étudiant
+app.post('/api/auth/signup/studiant', async (req, res) => {
+  let { email, password, linkedin_url, birthday, university, description } = req.body;
+  // Sanitize inputs
+  email = sanitizeString(email);
+  password = sanitizeString(password);
+  linkedin_url = sanitizeString(linkedin_url);
+  birthday = sanitizeString(birthday);
+  university = sanitizeString(university);
+  description = sanitizeString(description);
 
-//   let connection;
-//   try {
-//     connection = await getDbConnection();
-//     // Création de l'utilisateur
-//     const [userResult] = await connection.execute(
-//       'INSERT INTO user_ (email, password_hash, user_type) VALUES (?, ?, ?)',
-//       [email, password, 'studiant']
-//     );
-//     const userId = userResult.insertId;
-//     // Création du profil étudiant
-//     await connection.execute(
-//       'INSERT INTO studiant (linkedin_url, birthday, university, created_at, description, id_user) VALUES (?, ?, ?, NOW(), ?, ?)',
-//       [linkedin_url || null, birthday, university || null, description, userId]
-//     );
-//     res.status(201).json({ message: 'Studiant user created', userId });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: 'Error creating studiant user' });
-//   } finally {
-//     if (connection) await connection.end();
-//   }
-// });
+  let connection;
+  try {
+    connection = await getDbConnection();
+    // Création de l'utilisateur
+    const [userResult] = await connection.execute(
+      'INSERT INTO user_ (email, password_hash, user_type) VALUES (?, ?, ?)',
+      [email, password, 'studiant']
+    );
+    const userId = userResult.insertId;
+    // Création du profil étudiant
+    await connection.execute(
+      'INSERT INTO studiant (linkedin_url, birthday, university, created_at, description, id_user) VALUES (?, ?, ?, NOW(), ?, ?)',
+      [linkedin_url || null, birthday, university || null, description, userId]
+    );
+    res.status(201).json({ message: 'Studiant user created', userId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error creating studiant user' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
 
-// // Inscription pour une startup
-// app.post('/api/auth/signup/startup', async (req, res) => {
-//   let { email, password, linkedin_url, name, siret, status } = req.body;
-//   // Sanitize inputs
-//   email = sanitizeString(email);
-//   password = sanitizeString(password);
-//   linkedin_url = sanitizeString(linkedin_url);
-//   name = sanitizeString(name);
-//   siret = sanitizeString(siret);
-//   status = sanitizeString(status);
+// Inscription pour une startup
+app.post('/api/auth/signup/startup', async (req, res) => {
+  let { email, password, linkedin_url, name, siret, status } = req.body;
+  // Sanitize inputs
+  email = sanitizeString(email);
+  password = sanitizeString(password);
+  linkedin_url = sanitizeString(linkedin_url);
+  name = sanitizeString(name);
+  siret = sanitizeString(siret);
+  status = sanitizeString(status);
 
-//   let connection;
-//   try {
-//     connection = await getDbConnection();
-//     // Création de l'utilisateur
-//     const [userResult] = await connection.execute(
-//       'INSERT INTO user_ (email, password_hash, user_type) VALUES (?, ?, ?)',
+  let connection;
+  try {
+    connection = await getDbConnection();
+    // Création de l'utilisateur
+    const [userResult] = await connection.execute(
+      'INSERT INTO user_ (email, password_hash, user_type) VALUES (?, ?, ?)',
 
-//       [email, password, 'startup']
-//     );
-//     const userId = userResult.insertId;
-//     // Création du profil startup
-//     await connection.execute(
-//       'INSERT INTO startup (linkedin_url, name, siret, created_at, status, id_user) VALUES (?, ?, ?, NOW(), ?, ?)',
+      [email, password, 'startup']
+    );
+    const userId = userResult.insertId;
+    // Création du profil startup
+    await connection.execute(
+      'INSERT INTO startup (linkedin_url, name, siret, created_at, status, id_user) VALUES (?, ?, ?, NOW(), ?, ?)',
 
-//       [linkedin_url || null, name, siret, status, userId]
-//     );
-//     res.status(201).json({ message: 'Startup user created', userId });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: 'Error creating startup user' });
-//   } finally {
-//     if (connection) await connection.end();
-//   }
-// });
+      [linkedin_url || null, name, siret, status, userId]
+    );
+    res.status(201).json({ message: 'Startup user created', userId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error creating startup user' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
 
 // Route de login pour les étudiants
 app.post('/api/auth/login/studiant', async (req, res) => {
