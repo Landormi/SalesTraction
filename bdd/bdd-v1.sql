@@ -29,6 +29,11 @@ CREATE TABLE user_type(
    PRIMARY KEY(user_type)
 );
 
+CREATE TABLE candidate_status(
+   status VARCHAR(255) ,
+   PRIMARY KEY(status)
+);
+
 CREATE TABLE user_(
    id_user INT AUTO_INCREMENT Auto_increment,
    email VARCHAR(320)  NOT NULL,
@@ -39,17 +44,15 @@ CREATE TABLE user_(
 );
 
 CREATE TABLE startup(
-   id_startup INT AUTO_INCREMENT,
+   id_user INT,
    linkedin_url VARCHAR(255) ,
    name VARCHAR(255)  NOT NULL,
    siret VARCHAR(14)  NOT NULL,
    created_at DATETIME NOT NULL,
    status VARCHAR(9)  NOT NULL,
-   id_user INT NOT NULL,
-   PRIMARY KEY(id_startup),
-   UNIQUE(id_user),
-   FOREIGN KEY(status) REFERENCES status(status),
-   FOREIGN KEY(id_user) REFERENCES user_(id_user)
+   PRIMARY KEY(id_user),
+   FOREIGN KEY(id_user) REFERENCES user_(id_user),
+   FOREIGN KEY(status) REFERENCES status(status)
 );
 
 CREATE TABLE offre(
@@ -58,9 +61,9 @@ CREATE TABLE offre(
    description TEXT NOT NULL,
    price_range VARCHAR(50)  NOT NULL,
    comission INT NOT NULL,
-   id_startup INT NOT NULL,
+   id_user INT NOT NULL,
    PRIMARY KEY(id_offre),
-   FOREIGN KEY(id_startup) REFERENCES startup(id_startup)
+   FOREIGN KEY(id_user) REFERENCES startup(id_user)
 );
 
 CREATE TABLE Document(
@@ -68,12 +71,12 @@ CREATE TABLE Document(
    name VARCHAR(255)  NOT NULL,
    path VARCHAR(255)  NOT NULL,
    upload_date DATETIME NOT NULL,
-   id_startup INT,
+   id_user INT,
    document_category VARCHAR(255)  NOT NULL,
    type_document VARCHAR(255)  NOT NULL,
    id_offre INT,
    PRIMARY KEY(id_document),
-   FOREIGN KEY(id_startup) REFERENCES startup(id_startup),
+   FOREIGN KEY(id_user) REFERENCES startup(id_user),
    FOREIGN KEY(document_category) REFERENCES document_category(document_category),
    FOREIGN KEY(type_document) REFERENCES document_type(type_document),
    FOREIGN KEY(id_offre) REFERENCES offre(id_offre)
@@ -100,26 +103,35 @@ CREATE TABLE message(
 );
 
 CREATE TABLE studiant(
-   id_studiant INT AUTO_INCREMENT,
+   id_user INT,
    linkedin_url VARCHAR(255) ,
    birthday DATE NOT NULL,
    university VARCHAR(255) ,
    created_at DATETIME NOT NULL,
    description TEXT,
    id_document INT,
-   id_user INT NOT NULL,
-   PRIMARY KEY(id_studiant),
+   PRIMARY KEY(id_user),
    UNIQUE(id_document),
-   UNIQUE(id_user),
-   FOREIGN KEY(id_document) REFERENCES Document(id_document),
-   FOREIGN KEY(id_user) REFERENCES user_(id_user)
+   FOREIGN KEY(id_user) REFERENCES user_(id_user),
+   FOREIGN KEY(id_document) REFERENCES Document(id_document)
+);
+
+CREATE TABLE candidate(
+   id_offre INT,
+   id_user INT,
+   commissions_amount INT 	,
+   status VARCHAR(255)  NOT NULL,
+   PRIMARY KEY(id_offre, id_user),
+   FOREIGN KEY(id_offre) REFERENCES offre(id_offre),
+   FOREIGN KEY(id_user) REFERENCES studiant(id_user),
+   FOREIGN KEY(status) REFERENCES candidate_status(status)
 );
 
 CREATE TABLE language_studiant(
-   id_studiant INT,
+   id_user INT,
    language_ VARCHAR(255) ,
-   PRIMARY KEY(id_studiant, language_),
-   FOREIGN KEY(id_studiant) REFERENCES studiant(id_studiant),
+   PRIMARY KEY(id_user, language_),
+   FOREIGN KEY(id_user) REFERENCES studiant(id_user),
    FOREIGN KEY(language_) REFERENCES language_(language_)
 );
 
@@ -132,20 +144,9 @@ CREATE TABLE target_offre(
 );
 
 CREATE TABLE target_studiant(
-   id_studiant INT,
+   id_user INT,
    target_customer VARCHAR(50) ,
-   PRIMARY KEY(id_studiant, target_customer),
-   FOREIGN KEY(id_studiant) REFERENCES studiant(id_studiant),
+   PRIMARY KEY(id_user, target_customer),
+   FOREIGN KEY(id_user) REFERENCES studiant(id_user),
    FOREIGN KEY(target_customer) REFERENCES target_customer(target_customer)
-);
-
-CREATE TABLE candidate(
-   id_offre INT,
-   id_studiant INT,
-   motivation TEXT,
-   commissions_amount INT 	,
-   status VARCHAR(255)  NOT NULL,
-   PRIMARY KEY(id_offre, id_studiant),
-   FOREIGN KEY(id_offre) REFERENCES offre(id_offre),
-   FOREIGN KEY(id_studiant) REFERENCES studiant(id_studiant)
 );
