@@ -7,6 +7,7 @@ import StartupSignUp from './screens/StartupSinUp';
 import TalentSignUp from './screens/TalentSignUp';
 import ForgetPassword from './screens/ForgetPassword';
 import VerifyOTP from './screens/VerifyOTP';
+import CreateNewPassword from './screens/CreateNewPassword';
 
 
 import './App.css';
@@ -23,6 +24,7 @@ function App() {
           <Route path="/talent-signup" element={<TalentSignUp/>} />
           <Route path="/forget-password" element={<ForgetPassword />} />
           <Route path="/verify-otp" element={<VerifyOTP />} />
+          <Route path="/create-new-password" element={<CreateNewPassword />} />
         </Routes>
       </RouteHistoryProvider>
     </Router>
