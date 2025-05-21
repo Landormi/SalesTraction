@@ -25,6 +25,9 @@ app.use(cookieParser());
 // Simple sanitize utility
 function sanitizeString(str) {
   if (typeof str !== 'string') return '';
+  // Limite la taille à 512 caractères pour éviter les payloads trop longs
+  str = str.slice(0, 512);
+  // Retire les caractères dangereux
   return str.replace(/[<>'"`;]/g, '').trim();
 }
 
@@ -259,7 +262,7 @@ app.get('/api/profile/startup', authenticateToken, async (req, res) => {
   try {
     connection = await getDbConnection();
     const [rows] = await connection.execute(
-      `SELECT u.id_user, u.email, u.user_type, s.linkedin_url, s.name, s.siret, s.created_at, s.status
+      `SELECT u.id_user, u.email, u.user_type, s.linkedin_url, s.name, siret, s.created_at, s.status
        FROM user_ u
        JOIN startup s ON u.id_user = s.id_user
        WHERE u.id_user = ?`,
@@ -348,112 +351,187 @@ app.put('/api/startup', authenticateToken, async (req, res) => {
   }
 });
 
-// // Création d'une offre (startup uniquement)
-// app.post('/api/offre', authenticateToken, async (req, res) => {
-//   if (req.user.user_type !== 'startup') return res.status(403).json({ message: 'Accès refusé' });
-//   let { title, description, price_range, comission } = req.body;
-//   title = sanitizeString(title);
-//   description = sanitizeString(description);
-//   price_range = sanitizeString(price_range);
-//   comission = parseInt(comission, 10);
+// Création d'une offre (startup uniquement)
+app.post('/api/offre', authenticateToken, async (req, res) => {
+  if (req.user.user_type !== 'startup') return res.status(403).json({ message: 'Accès refusé' });
+  let { title, description, price_range, comission } = req.body;
+  title = sanitizeString(title);
+  description = sanitizeString(description);
+  price_range = sanitizeString(price_range);
+  comission = Number(comission);
+  if (!title || !description || !price_range || !Number.isInteger(comission)) {
+    return res.status(400).json({ message: 'Champs manquants ou invalides.' });
+  }
 
-//   if (!title || !description || !price_range || isNaN(comission)) {
-//     return res.status(400).json({ message: 'Champs manquants ou invalides.' });
-//   }
+  let connection;
+  try {
+    connection = await getDbConnection();
+    const [result] = await connection.execute(
+      'INSERT INTO offre (title, description, price_range, comission, id_user) VALUES (?, ?, ?, ?, ?)',
+      [title, description, price_range, comission, req.user.id_user]
+    );
+    res.status(201).json({ message: 'Offre créée', id_offre: result.insertId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur lors de la création de l\'offre.' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
 
-//   let connection;
-//   try {
-//     connection = await getDbConnection();
-//     const [result] = await connection.execute(
-//       'INSERT INTO offre (title, description, price_range, comission, id_user) VALUES (?, ?, ?, ?, ?)',
-//       [title, description, price_range, comission, req.user.id_user]
-//     );
-//     res.status(201).json({ message: 'Offre créée', id_offre: result.insertId });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: 'Erreur lors de la création de l\'offre.' });
-//   } finally {
-//     if (connection) await connection.end();
-//   }
-// });
+// Visualisation d'une offre (étudiant ou startup propriétaire)
+app.get('/api/offre/:id', authenticateToken, async (req, res) => {
+  const id_offre = Number(req.params.id);
+  if (!Number.isInteger(id_offre) || id_offre <= 0) return res.status(400).json({ message: 'ID d\'offre invalide.' });
 
-// // Visualisation d'une offre (étudiant ou startup propriétaire)
-// app.get('/api/offre/:id', authenticateToken, async (req, res) => {
-//   const id_offre = parseInt(req.params.id, 10);
-//   if (isNaN(id_offre)) return res.status(400).json({ message: 'ID d\'offre invalide.' });
+  let connection;
+  try {
+    connection = await getDbConnection();
+    const [rows] = await connection.execute(
+      'SELECT * FROM offre WHERE id_offre = ?',
+      [id_offre]
+    );
+    if (rows.length === 0) return res.status(404).json({ message: 'Offre non trouvée.' });
 
-//   let connection;
-//   try {
-//     connection = await getDbConnection();
-//     const [rows] = await connection.execute(
-//       'SELECT * FROM offre WHERE id_offre = ?',
-//       [id_offre]
-//     );
-//     if (rows.length === 0) return res.status(404).json({ message: 'Offre non trouvée.' });
+    const offre = rows[0];
+    // Autorisé si étudiant OU startup propriétaire
+    if (
+      req.user.user_type === 'studiant' ||
+      (req.user.user_type === 'startup' && req.user.id_user === offre.id_user)
+    ) {
+      res.json(offre);
+    } else {
+      res.status(403).json({ message: 'Accès refusé.' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la récupération de l\'offre.' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
 
-//     const offre = rows[0];
-//     // Autorisé si étudiant OU startup propriétaire
-//     if (
-//       req.user.user_type === 'studiant' ||
-//       (req.user.user_type === 'startup' && req.user.id_user === offre.id_user)
-//     ) {
-//       res.json(offre);
-//     } else {
-//       res.status(403).json({ message: 'Accès refusé.' });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ message: 'Erreur lors de la récupération de l\'offre.' });
-//   } finally {
-//     if (connection) await connection.end();
-//   }
-// });
+// Modification d'une offre (startup propriétaire uniquement)
+app.put('/api/offre/:id', authenticateToken, async (req, res) => {
+  if (req.user.user_type !== 'startup') return res.status(403).json({ message: 'Accès refusé' });
+  const id_offre = Number(req.params.id);
+  if (!Number.isInteger(id_offre) || id_offre <= 0) return res.status(400).json({ message: 'ID d\'offre invalide.' });
 
-// // Modification d'une offre (startup propriétaire uniquement)
-// app.put('/api/offre/:id', authenticateToken, async (req, res) => {
-//   if (req.user.user_type !== 'startup') return res.status(403).json({ message: 'Accès refusé' });
-//   const id_offre = parseInt(req.params.id, 10);
-//   if (isNaN(id_offre)) return res.status(400).json({ message: 'ID d\'offre invalide.' });
+  let { title, description, price_range, comission } = req.body;
+  title = title !== undefined ? sanitizeString(title) : undefined;
+  description = description !== undefined ? sanitizeString(description) : undefined;
+  price_range = price_range !== undefined ? sanitizeString(price_range) : undefined;
+  comission = comission !== undefined ? parseInt(comission, 10) : undefined;
 
-//   let { title, description, price_range, comission } = req.body;
-//   title = title !== undefined ? sanitizeString(title) : undefined;
-//   description = description !== undefined ? sanitizeString(description) : undefined;
-//   price_range = price_range !== undefined ? sanitizeString(price_range) : undefined;
-//   comission = comission !== undefined ? parseInt(comission, 10) : undefined;
+  let connection;
+  try {
+    connection = await getDbConnection();
+    // Vérifie que l'offre appartient à la startup
+    const [rows] = await connection.execute(
+      'SELECT id_user FROM offre WHERE id_offre = ?',
+      [id_offre]
+    );
+    if (rows.length === 0) return res.status(404).json({ message: 'Offre non trouvée.' });
+    if (rows[0].id_user !== req.user.id_user) return res.status(403).json({ message: 'Accès refusé.' });
 
-//   let connection;
-//   try {
-//     connection = await getDbConnection();
-//     // Vérifie que l'offre appartient à la startup
-//     const [rows] = await connection.execute(
-//       'SELECT id_user FROM offre WHERE id_offre = ?',
-//       [id_offre]
-//     );
-//     if (rows.length === 0) return res.status(404).json({ message: 'Offre non trouvée.' });
-//     if (rows[0].id_user !== req.user.id_user) return res.status(403).json({ message: 'Accès refusé.' });
+    const fields = [];
+    const values = [];
+    if (title !== undefined) { fields.push('title = ?'); values.push(title); }
+    if (description !== undefined) { fields.push('description = ?'); values.push(description); }
+    if (price_range !== undefined) { fields.push('price_range = ?'); values.push(price_range); }
+    if (comission !== undefined && !isNaN(comission)) { fields.push('comission = ?'); values.push(comission); }
+    if (fields.length === 0) {
+      return res.status(400).json({ message: 'Aucune donnée à mettre à jour.' });
+    }
+    values.push(id_offre);
+    const sql = `UPDATE offre SET ${fields.join(', ')} WHERE id_offre = ?`;
+    const [result] = await connection.execute(sql, values);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Offre non trouvée.' });
+    }
+    res.json({ message: 'Offre mise à jour.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur lors de la mise à jour de l\'offre.' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
 
-//     const fields = [];
-//     const values = [];
-//     if (title !== undefined) { fields.push('title = ?'); values.push(title); }
-//     if (description !== undefined) { fields.push('description = ?'); values.push(description); }
-//     if (price_range !== undefined) { fields.push('price_range = ?'); values.push(price_range); }
-//     if (comission !== undefined && !isNaN(comission)) { fields.push('comission = ?'); values.push(comission); }
-//     if (fields.length === 0) {
-//       return res.status(400).json({ message: 'Aucune donnée à mettre à jour.' });
-//     }
-//     values.push(id_offre);
-//     const sql = `UPDATE offre SET ${fields.join(', ')} WHERE id_offre = ?`;
-//     const [result] = await connection.execute(sql, values);
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({ message: 'Offre non trouvée.' });
-//     }
-//     res.json({ message: 'Offre mise à jour.' });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: 'Erreur lors de la mise à jour de l\'offre.' });
-//   } finally {
-//     if (connection) await connection.end();
-//   }
-// });
+// Liste d'offres avec filtres (étudiant : tout, startup : seulement ses offres)
+app.get('/api/offres', authenticateToken, async (req, res) => {
+  const {
+    days,
+    title,
+    comission_min,
+    comission_max,
+    price_range
+  } = req.query;
+
+  let where = [];
+  let params = [];
+
+  // Filtre date de création (moins de X jours)
+  if (days && !isNaN(parseInt(days, 10))) {
+    where.push('o.created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)');
+    params.push(parseInt(days, 10));
+  }
+  // Filtre titre (contient)
+  if (title) {
+    where.push('o.title LIKE ?');
+    params.push(`%${title}%`);
+  }
+  // Filtre commission min
+  if (comission_min && !isNaN(parseInt(comission_min, 10))) {
+    where.push('o.comission >= ?');
+    params.push(parseInt(comission_min, 10));
+  }
+  // Filtre commission max
+  if (comission_max && !isNaN(parseInt(comission_max, 10))) {
+    where.push('o.comission <= ?');
+    params.push(parseInt(comission_max, 10));
+  }
+  // Filtre price_range (contient)
+  if (price_range) {
+    where.push('o.price_range LIKE ?');
+    params.push(`%${price_range}%`);
+  }
+
+  // Restriction selon le type d'utilisateur
+  if (req.user.user_type === 'startup') {
+    where.push('o.id_user = ?');
+    params.push(req.user.id_user);
+  } else if (req.user.user_type !== 'studiant') {
+    return res.status(403).json({ message: 'Accès refusé.' });
+  }
+
+  let sql = `
+    SELECT 
+      o.id_offre,
+      o.title,
+      LEFT(o.description, 100) AS description,
+      s.name AS startup_name,
+      o.price_range,
+      o.comission,
+      o.created_at
+    FROM offre o
+    JOIN startup s ON o.id_user = s.id_user
+  `;
+  if (where.length > 0) {
+    sql += ' WHERE ' + where.join(' AND ');
+  }
+  sql += ' ORDER BY o.created_at DESC';
+
+  let connection;
+  try {
+    connection = await getDbConnection();
+    const [rows] = await connection.execute(sql, params);
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la récupération des offres.' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
 
 // Démarrage du serveur
 app.listen(PORT, () => {

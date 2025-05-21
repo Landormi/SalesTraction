@@ -257,5 +257,172 @@ async function fetchWithCookies(url, options = {}, cookies = '') {
     if (!json.email || !json.user_type) throw new Error('Profil startup invalide');
   });
 
+  // Création d'offre (startup)
+  let createdOffreId = null;
+  await test('Création offre (startup)', async () => {
+    const res = await fetchWithCookies(`${baseUrl}/api/offre`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Offre Test',
+        description: 'Description de l\'offre test',
+        price_range: '1000-2000',
+        comission: 20
+      })
+    }, startupTokenCookie);
+    const json = await res.json();
+    if (!json.id_offre) throw new Error('Offre non créée');
+    createdOffreId = json.id_offre;
+  });
+
+  // Création d'offre (refus étudiant)
+  await test('Création offre (refus étudiant)', async () => {
+    const res = await fetch(`${baseUrl}/api/offre`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Cookie': studentTokenCookie },
+      body: JSON.stringify({
+        title: 'Offre Interdite',
+        description: 'Ne doit pas marcher',
+        price_range: '1000-2000',
+        comission: 10
+      })
+    });
+    if (res.status !== 403) throw new Error('Should return 403');
+  });
+
+  // Visualisation offre (étudiant)
+  await test('Visualisation offre (étudiant)', async () => {
+    const res = await fetchWithCookies(`${baseUrl}/api/offre/${createdOffreId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    }, studentTokenCookie);
+    const json = await res.json();
+    if (!json.title || json.id_offre !== createdOffreId) throw new Error('Offre non visible pour étudiant');
+  });
+
+  // Visualisation offre (startup propriétaire)
+  await test('Visualisation offre (startup propriétaire)', async () => {
+    const res = await fetchWithCookies(`${baseUrl}/api/offre/${createdOffreId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    }, startupTokenCookie);
+    const json = await res.json();
+    if (!json.title || json.id_offre !== createdOffreId) throw new Error('Offre non visible pour startup propriétaire');
+  });
+
+  // Visualisation offre (startup non propriétaire)
+  await test('Visualisation offre (startup non propriétaire)', async () => {
+    // Création d'une autre startup
+    await fetchJson(`${baseUrl}/api/auth/signup/startup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'otherstartup@example.com',
+        password: 'testpass',
+        linkedin_url: 'https://linkedin.com/company/otherstartup',
+        name: 'Other Startup',
+        siret: '88888888888888',
+        status: 'active'
+      })
+    });
+    const resLogin = await fetch(`${baseUrl}/api/auth/login/startup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'otherstartup@example.com',
+        password: 'testpass'
+      })
+    });
+    const otherStartupTokenCookie = (resLogin.headers.get('set-cookie') || '').split(';')[0];
+    const res = await fetch(`${baseUrl}/api/offre/${createdOffreId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json', 'Cookie': otherStartupTokenCookie }
+    });
+    if (res.status !== 403) throw new Error('Should return 403');
+  });
+
+  // Modification offre (startup propriétaire)
+  await test('Modification offre (startup propriétaire)', async () => {
+    const res = await fetchWithCookies(`${baseUrl}/api/offre/${createdOffreId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Offre Test Modifiée',
+        price_range: '2000-3000'
+      })
+    }, startupTokenCookie);
+    const json = await res.json();
+    if (!json.message || !json.message.includes('mise à jour')) throw new Error('Modification échouée');
+  });
+
+  // Modification offre (étudiant, refusé)
+  await test('Modification offre (étudiant, refusé)', async () => {
+    const res = await fetch(`${baseUrl}/api/offre/${createdOffreId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Cookie': studentTokenCookie },
+      body: JSON.stringify({ title: 'Tentative Étudiant' })
+    });
+    if (res.status !== 403) throw new Error('Should return 403');
+  });
+
+  // Modification offre (startup non propriétaire, refusé)
+  await test('Modification offre (startup non propriétaire, refusé)', async () => {
+    // Utilise le token de l'autre startup déjà créé
+    const resLogin = await fetch(`${baseUrl}/api/auth/login/startup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'otherstartup@example.com',
+        password: 'testpass'
+      })
+    });
+    const otherStartupTokenCookie = (resLogin.headers.get('set-cookie') || '').split(';')[0];
+    const res = await fetch(`${baseUrl}/api/offre/${createdOffreId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Cookie': otherStartupTokenCookie },
+      body: JSON.stringify({ title: 'Tentative Non Propriétaire' })
+    });
+    if (res.status !== 403) throw new Error('Should return 403');
+  });
+
+  // Modification offre (aucune donnée)
+  await test('Modification offre (aucune donnée)', async () => {
+    const res = await fetch(`${baseUrl}/api/offre/${createdOffreId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Cookie': startupTokenCookie },
+      body: JSON.stringify({})
+    });
+    if (res.status !== 400) throw new Error('Should return 400');
+  });
+
+  // Visualisation offre (inexistante)
+  await test('Visualisation offre (inexistante)', async () => {
+    const res = await fetch(`${baseUrl}/api/offre/999999`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json', 'Cookie': studentTokenCookie }
+    });
+    if (res.status !== 404) throw new Error('Should return 404');
+  });
+
+  // Modification offre (inexistante)
+  await test('Modification offre (inexistante)', async () => {
+    const res = await fetch(`${baseUrl}/api/offre/999999`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Cookie': startupTokenCookie },
+      body: JSON.stringify({ title: 'Inexistante' })
+    });
+    if (res.status !== 404) throw new Error('Should return 404');
+  });
+
+  // Création offre (champs manquants)
+  await test('Création offre (champs manquants)', async () => {
+    const res = await fetch(`${baseUrl}/api/offre`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Cookie': startupTokenCookie },
+      body: JSON.stringify({ title: '', description: '', price_range: '', comission: '' })
+    });
+    if (res.status !== 400) throw new Error('Should return 400');
+  });
+
   console.log('Tous les tests sont terminés.');
 })();
