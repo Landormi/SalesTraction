@@ -97,3 +97,49 @@
 .d-flex.align-items-center.mb-4 {
   margin-bottom: 1.5rem !important;
 }
+
+
+
+
+/* ==== Styles spécifiques à la page ShowOffers ==== */
+
+/* Grille d'offres améliorée */
+.row-cols-md-2 .col {
+  transition: transform 0.3s ease;
+}
+
+.row-cols-md-2 .col:hover {
+  transform: translateY(-5px);
+}
+
+/* Carte d'offre */
+.card .card-body {
+  padding: 1.5rem;
+}
+
+/* Badge de type de contrat */
+.position-absolute.bg-primary {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem !important;
+}
+
+/* Titre de l'offre */
+.card-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+  
+  .filters-section {
+    flex-direction: column;
+    gap: 1rem !important;
+  }
+}
