@@ -76,10 +76,11 @@ app.post('/api/auth/signup/studiant', async (req, res) => {
       [email, password, 'studiant']
     );
     const userId = userResult.insertId;
-    // Création du profil étudiant
+    // Création du profil étudiant (clé primaire = id_user)
     await connection.execute(
-      'INSERT INTO studiant (linkedin_url, birthday, university, created_at, description, id_user) VALUES (?, ?, ?, NOW(), ?, ?)',
-      [linkedin_url || null, birthday, university || null, description, userId]
+      'INSERT INTO studiant (id_user, linkedin_url, birthday, university, created_at, description) VALUES (?, ?, ?, ?, NOW(), ?)',
+
+      [userId, linkedin_url || null, birthday, university || null, description]
     );
     res.status(201).json({ message: 'Studiant user created', userId });
   } catch (error) {
@@ -119,11 +120,11 @@ app.post('/api/auth/signup/startup', async (req, res) => {
       [email, password, 'startup']
     );
     const userId = userResult.insertId;
-    // Création du profil startup
+    // Création du profil startup (clé primaire = id_user)
     await connection.execute(
-      'INSERT INTO startup (linkedin_url, name, siret, created_at, status, id_user) VALUES (?, ?, ?, NOW(), ?, ?)',
+      'INSERT INTO startup (id_user, linkedin_url, name, siret, created_at, status) VALUES (?, ?, ?, ?, NOW(), ?)',
 
-      [linkedin_url || null, name, siret, status, userId]
+      [userId, linkedin_url || null, name, siret, status]
     );
     res.status(201).json({ message: 'Startup user created', userId });
   } catch (error) {
@@ -197,6 +198,78 @@ app.get('/api/db/test', async (req, res) => {
     res.json({ success: true, message: 'Connexion à la base de données réussie.' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Erreur de connexion à la base de données.', error: error.message });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
+
+// Modification d'un étudiant
+app.put('/api/studiant/:id', async (req, res) => {
+  const id = req.params.id;
+  let { linkedin_url, birthday, university, description } = req.body;
+  linkedin_url = linkedin_url !== undefined ? sanitizeString(linkedin_url) : undefined;
+  birthday = birthday !== undefined ? sanitizeString(birthday) : undefined;
+  university = university !== undefined ? sanitizeString(university) : undefined;
+  description = description !== undefined ? sanitizeString(description) : undefined;
+
+  let connection;
+  try {
+    connection = await getDbConnection();
+    const fields = [];
+    const values = [];
+    if (linkedin_url !== undefined) { fields.push('linkedin_url = ?'); values.push(linkedin_url || null); }
+    if (birthday !== undefined) { fields.push('birthday = ?'); values.push(birthday); }
+    if (university !== undefined) { fields.push('university = ?'); values.push(university || null); }
+    if (description !== undefined) { fields.push('description = ?'); values.push(description || null); }
+    if (fields.length === 0) {
+      return res.status(400).json({ message: 'Aucune donnée à mettre à jour.' });
+    }
+    values.push(id);
+    const sql = `UPDATE studiant SET ${fields.join(', ')} WHERE id_user = ?`;
+    const [result] = await connection.execute(sql, values);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Studiant non trouvé.' });
+    }
+    res.json({ message: 'Studiant mis à jour.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur lors de la mise à jour du studiant.' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
+
+// Modification d'une startup
+app.put('/api/startup/:id', async (req, res) => {
+  const id = req.params.id;
+  let { linkedin_url, name, siret, status } = req.body;
+  linkedin_url = linkedin_url !== undefined ? sanitizeString(linkedin_url) : undefined;
+  name = name !== undefined ? sanitizeString(name) : undefined;
+  siret = siret !== undefined ? sanitizeString(siret) : undefined;
+  status = status !== undefined ? sanitizeString(status) : undefined;
+
+  let connection;
+  try {
+    connection = await getDbConnection();
+    const fields = [];
+    const values = [];
+    if (linkedin_url !== undefined) { fields.push('linkedin_url = ?'); values.push(linkedin_url || null); }
+    if (name !== undefined) { fields.push('name = ?'); values.push(name); }
+    if (siret !== undefined) { fields.push('siret = ?'); values.push(siret); }
+    if (status !== undefined) { fields.push('status = ?'); values.push(status); }
+    if (fields.length === 0) {
+      return res.status(400).json({ message: 'Aucune donnée à mettre à jour.' });
+    }
+    values.push(id);
+    const sql = `UPDATE startup SET ${fields.join(', ')} WHERE id_user = ?`;
+    const [result] = await connection.execute(sql, values);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Startup non trouvée.' });
+    }
+    res.json({ message: 'Startup mise à jour.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur lors de la mise à jour de la startup.' });
   } finally {
     if (connection) await connection.end();
   }
