@@ -1,7 +1,7 @@
 # Node modules (backend et frontend)
 back/node_modules/
 front/node_modules/
-
+node_modules/
 # Builds
 front/build/
 back/dist/
