@@ -2,9 +2,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Link } from 'react-router-dom';
 import {FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { RouteHistoryContext } from '../RouteHistoryContext';
 
 
 function ForgetPassword() {
+  const { previousPath } = useContext(RouteHistoryContext);
   const navigate = useNavigate();
 
   return (
@@ -55,6 +58,9 @@ function ForgetPassword() {
             <span className="text-muted">Remember your password?</span>{' '}
             <Link to="/login" className="text-primary">Login</Link>
           </div>
+          <div>
+      <p>Page précédente : {previousPath || "Aucune"}</p>
+      </div>
         </form>
       </div>
     </div>
