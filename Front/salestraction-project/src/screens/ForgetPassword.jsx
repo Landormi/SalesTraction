@@ -43,7 +43,10 @@ function ForgetPassword() {
           </div>
 
           {/* Bouton de soumission */}
-          <button className="btn btn-primary w-100 mb-3 py-2">
+          <button 
+            className="btn btn-primary w-100 mb-3 py-2"
+            onClick={() => navigate('/verify-otp')}
+          >
             Reset Password
           </button>
 
