@@ -9,9 +9,15 @@ import ForgetPassword from './screens/ForgetPassword';
 import VerifyOTP from './screens/VerifyOTP';
 import CreateNewPassword from './screens/CreateNewPassword';
 import ShowOffers from './screens/ShowOffers';
+import AddOffers from './screens/AddOffers';
+import ArchiveOffers from './screens/ArchiveOffer';
+import ContactPage from './screens/ContactPage';
+import ProfileStartup from './screens/ProfileStartup';
+import DetailsOffer from './screens/DetailsOffer';
 
 
 import './App.css';
+
 
 function App() {
   return (
@@ -27,6 +33,14 @@ function App() {
           <Route path="/verify-otp" element={<VerifyOTP />} />
           <Route path="/create-new-password" element={<CreateNewPassword />} />
           <Route path="/offers" element={<ShowOffers />} />
+          <Route path="/add-offer" element={<AddOffers/>} />
+          <Route path="/archive-offer" element={<ArchiveOffers/>} />
+          <Route path="/contact" element={<ContactPage/>} />
+          <Route path="/profile-startup" element={<ProfileStartup />} />
+          <Route path="/offer/:id" element={<DetailsOffer />} />
+
+
+
         </Routes>
       </RouteHistoryProvider>
     </Router>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaSearch, FaMapMarkerAlt, FaBars, FaTimes, FaBuilding } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 
-function ShowOffers() {
+function ArchiveOffers() {
   const navigate = useNavigate();
   const [prevPage, setPrevPage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -71,11 +71,6 @@ function ShowOffers() {
       if (sortOption === "Location") return a.location.localeCompare(b.location);
       return 0;
     });
-  
-    const handleApplyClick = (offer) => {
-    // Naviguer vers la page de détails avec l'offre complète en paramètre
-    navigate(`/offer/${offer.id}`, { state: { offer } });
-  };
 
   return (
     <div className="centered-page">
@@ -223,8 +218,7 @@ function ShowOffers() {
                       </div>
                     </div>
                   </div>
-                  <button className="btn btn-primary w-100 mt-2"
-                  onClick={() => handleApplyClick(offer)}>Show</button>
+                  <button className="btn btn-primary w-100 mt-2">Apply</button>
                 </div>
               </div>
             </div>
@@ -235,4 +229,4 @@ function ShowOffers() {
   );
 }
 
-export default ShowOffers;
+export default ArchiveOffers;
