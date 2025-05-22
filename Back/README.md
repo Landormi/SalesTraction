@@ -51,6 +51,28 @@ Dans le dossier `Back` :
 Une documentation Swagger est disponible à l'adresse :  
 [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
 
+## Principales routes API
+
+| Méthode | URL                                 | Description                                                                                  |
+|---------|-------------------------------------|----------------------------------------------------------------------------------------------|
+| POST    | `/api/auth/signup/studiant`         | Inscription d'un étudiant                                                                    |
+| POST    | `/api/auth/signup/startup`          | Inscription d'une startup                                                                    |
+| POST    | `/api/auth/login/studiant`          | Connexion d'un étudiant                                                                      |
+| POST    | `/api/auth/login/startup`           | Connexion d'une startup                                                                      |
+| GET     | `/api/profile/studiant`             | Récupérer le profil de l'étudiant connecté                                                   |
+| GET     | `/api/profile/startup`              | Récupérer le profil de la startup connectée                                                  |
+| PUT     | `/api/studiant`                     | Modifier le profil de l'étudiant connecté                                                    |
+| PUT     | `/api/startup`                      | Modifier le profil de la startup connectée                                                   |
+| POST    | `/api/offre`                        | Créer une offre (startup uniquement)                                                         |
+| GET     | `/api/offre/:id`                    | Voir une offre (étudiant ou startup propriétaire)                                            |
+| PUT     | `/api/offre/:id`                    | Modifier une offre (startup propriétaire uniquement)                                         |
+| GET     | `/api/offre/:id/candidates`         | Voir les candidats d'une offre (startup propriétaire uniquement)                             |
+| GET     | `/api/offres`                       | Lister les offres (étudiant : toutes, startup : seulement les siennes, filtres disponibles)  |
+| GET     | `/api/db/test`                      | Tester la connexion à la base de données                                                     |
+| GET     | `/api/docs`                         | Documentation interactive Swagger                                                            |
+
+> Pour le détail des paramètres et des réponses, voir la documentation Swagger intégrée.
+
 ## Tests
 
 Un script de test rapide est fourni :
