@@ -69,8 +69,8 @@ function TalentHistory() {
             <li className="nav-item"><a className="nav-link" href="/talent-show-offer">Home</a></li>
             <li className="nav-item"><a className="nav-link" href="/talent-history">History</a></li>
             <li className="nav-item"><a className="nav-link" href="/profile-talent">Profile</a></li>
-            <li className="nav-item"><a className="nav-link" href="/contact">Contact</a></li>
-            <li className="nav-item"><a className="nav-link text-danger" href="/startup-login">Logout</a></li>
+            <li className="nav-item"><a className="nav-link" href="/contact-talent">Contact</a></li>
+            <li className="nav-item"><a className="nav-link text-danger" href="/talent-login">Logout</a></li>
           </ul>
         </div>
 

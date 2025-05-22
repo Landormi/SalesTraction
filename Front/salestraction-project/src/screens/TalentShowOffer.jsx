@@ -74,7 +74,7 @@ function TalentShowOffers() {
   
     const handleApplyClick = (offer) => {
     // Naviguer vers la page de détails avec l'offre complète en paramètre
-    navigate(`/offer/${offer.id}`, { state: { offer } });
+    navigate(`/offer-talent/${offer.id}`, { state: { offer } });
   };
 
   return (
@@ -106,10 +106,10 @@ function TalentShowOffers() {
               <a className="nav-link" href="/profile-talent">Profile</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/contact">Contact</a>
+              <a className="nav-link" href="/contact-talent">Contact</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link  text-danger" href="/startup-login">Logout</a>
+              <a className="nav-link  text-danger" href="/talent-login">Logout</a>
             </li>
           </ul>
         </div>
