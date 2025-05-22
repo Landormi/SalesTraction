@@ -59,7 +59,7 @@ INSERT IGNORE INTO status_offre (status_offre) VALUES
 ('close');
 
 -- Ajout des startups liées à user_
-INSERT INTO startup (id_user, linkedin_url, name, siret, created_at, status_startup)
+INSERT INTO startup (linkedin_url, name, siret, created_at, status_startup, id_user)
 VALUES
 (NULL, 'Startup 1', '12345678901234', '2023-01-01 00:00:00', 'active', 17),
 ('https://linkedin.com/company/startup2', 'Startup 2', '22345678901234', '2023-01-01 00:00:00', 'active', 18),

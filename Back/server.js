@@ -7,7 +7,6 @@ import mysql from 'mysql2/promise'; // MariaDB client
 import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
-import path from 'path';
 import { fileURLToPath } from 'url';
 
 // Charge le bon fichier .env selon l'environnement
