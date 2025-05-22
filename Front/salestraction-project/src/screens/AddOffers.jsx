@@ -66,16 +66,16 @@ function AddOffers() {
               <a className="nav-link active" href="/add-offer">Add offers</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#">Archive</a>
+              <a className="nav-link" href="archive-offer">Archive</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#">Profile</a>
+              <a className="nav-link" href="/profile-startup">Profile</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#">Contact</a>
+              <a className="nav-link" href="/contact">Contact</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link text-danger" href="#">Logout</a>
+              <a className="nav-link text-danger" href="/startup-login">Logout</a>
             </li>
           </ul>
         </div>

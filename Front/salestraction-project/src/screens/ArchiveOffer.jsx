@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaSearch, FaMapMarkerAlt, FaBars, FaTimes, FaBuilding } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 
-function ShowOffers() {
+function ArchiveOffers() {
   const navigate = useNavigate();
   const [prevPage, setPrevPage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -229,4 +229,4 @@ function ShowOffers() {
   );
 }
 
-export default ShowOffers;
+export default ArchiveOffers;
