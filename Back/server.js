@@ -65,6 +65,8 @@ function authenticateToken(req, res, next) {
 // Routes
 
 // Inscription pour un étudiant
+// Entrée: body { email, password, linkedin_url, birthday, university, description }
+// Sortie: 201 { message, userId } ou 409/500 { message }
 app.post('/api/auth/signup/studiant', async (req, res) => {
   let { email, password, linkedin_url, birthday, university, description } = req.body;
   // Sanitize inputs
@@ -109,6 +111,8 @@ app.post('/api/auth/signup/studiant', async (req, res) => {
 });
 
 // Inscription pour une startup
+// Entrée: body { email, password, linkedin_url, name, siret, status }
+// Sortie: 201 { message, userId } ou 409/500 { message }
 app.post('/api/auth/signup/startup', async (req, res) => {
   let { email, password, linkedin_url, name, siret, status } = req.body;
   // Sanitize inputs
@@ -153,6 +157,8 @@ app.post('/api/auth/signup/startup', async (req, res) => {
 });
 
 // Route de login pour les étudiants
+// Entrée: body { email, password }
+// Sortie: 200 { user } + cookie 'token' ou 401/500 { message }
 app.post('/api/auth/login/studiant', async (req, res) => {
   let { email, password } = req.body;
   email = sanitizeString(email);
@@ -188,6 +194,8 @@ app.post('/api/auth/login/studiant', async (req, res) => {
 });
 
 // Route de login pour les startups
+// Entrée: body { email, password }
+// Sortie: 200 { user } + cookie 'token' ou 401/500 { message }
 app.post('/api/auth/login/startup', async (req, res) => {
   let { email, password } = req.body;
   email = sanitizeString(email);
@@ -223,6 +231,8 @@ app.post('/api/auth/login/startup', async (req, res) => {
 });
 
 // Route pour tester la connexion à la BDD
+// Entrée: aucune
+// Sortie: 200 { success, message } ou 500 { success, message, error }
 app.get('/api/db/test', async (req, res) => {
   let connection;
   try {
@@ -237,6 +247,8 @@ app.get('/api/db/test', async (req, res) => {
 });
 
 // Route pour récupérer le profil étudiant (hors mot de passe)
+// Entrée: header cookie/token (JWT), GET
+// Sortie: 200 { ...profil... } ou 403/404/500 { message }
 app.get('/api/profile/studiant', authenticateToken, async (req, res) => {
   if (req.user.user_type !== 'studiant') return res.status(403).json({ message: 'Accès refusé' });
   let connection;
@@ -259,6 +271,8 @@ app.get('/api/profile/studiant', authenticateToken, async (req, res) => {
 });
 
 // Route pour récupérer le profil startup (hors mot de passe)
+// Entrée: header cookie/token (JWT), GET
+// Sortie: 200 { ...profil... } ou 403/404/500 { message }
 app.get('/api/profile/startup', authenticateToken, async (req, res) => {
   if (req.user.user_type !== 'startup') return res.status(403).json({ message: 'Accès refusé' });
   let connection;
@@ -281,6 +295,8 @@ app.get('/api/profile/startup', authenticateToken, async (req, res) => {
 });
 
 // Modification d'un étudiant (id récupéré via le token)
+// Entrée: header cookie/token (JWT), body { linkedin_url?, birthday?, university?, description? }
+// Sortie: 200 { message } ou 400/403/404/500 { message }
 app.put('/api/studiant', authenticateToken, async (req, res) => {
   if (req.user.user_type !== 'studiant') return res.status(403).json({ message: 'Accès refusé' });
   const id = req.user.id_user;
@@ -318,6 +334,8 @@ app.put('/api/studiant', authenticateToken, async (req, res) => {
 });
 
 // Modification d'une startup (id récupéré via le token)
+// Entrée: header cookie/token (JWT), body { linkedin_url?, name?, siret?, status? }
+// Sortie: 200 { message } ou 400/403/404/500 { message }
 app.put('/api/startup', authenticateToken, async (req, res) => {
   if (req.user.user_type !== 'startup') return res.status(403).json({ message: 'Accès refusé' });
   const id = req.user.id_user;
@@ -355,6 +373,8 @@ app.put('/api/startup', authenticateToken, async (req, res) => {
 });
 
 // Création d'une offre (startup uniquement)
+// Entrée: header cookie/token (JWT), body { title, description, price_range, comission }
+// Sortie: 201 { message, id_offre } ou 400/403/500 { message }
 app.post('/api/offre', authenticateToken, async (req, res) => {
   if (req.user.user_type !== 'startup') return res.status(403).json({ message: 'Accès refusé' });
   let { title, description, price_range, comission } = req.body;
@@ -383,6 +403,8 @@ app.post('/api/offre', authenticateToken, async (req, res) => {
 });
 
 // Visualisation d'une offre (étudiant ou startup propriétaire)
+// Entrée: header cookie/token (JWT), param :id
+// Sortie: 200 { ...offre... } ou 400/403/404/500 { message }
 app.get('/api/offre/:id', authenticateToken, async (req, res) => {
   const id_offre = Number(req.params.id);
   if (!Number.isInteger(id_offre) || id_offre <= 0) return res.status(400).json({ message: 'ID d\'offre invalide.' });
@@ -414,6 +436,8 @@ app.get('/api/offre/:id', authenticateToken, async (req, res) => {
 });
 
 // Modification d'une offre (startup propriétaire uniquement)
+// Entrée: header cookie/token (JWT), param :id, body { title?, description?, price_range?, comission? }
+// Sortie: 200 { message } ou 400/403/404/500 { message }
 app.put('/api/offre/:id', authenticateToken, async (req, res) => {
   if (req.user.user_type !== 'startup') return res.status(403).json({ message: 'Accès refusé' });
   const id_offre = Number(req.params.id);
@@ -460,7 +484,61 @@ app.put('/api/offre/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// Route pour récupérer les candidats d'une offre (startup propriétaire uniquement)
+// Entrée: header cookie/token (JWT), param :id
+// Sortie: 200 [ { id_user, email, linkedin_url, university, birthday, description, commissions_amount, status }, ... ] ou 400/403/404/500 { message }
+app.get('/api/offre/:id/candidates', authenticateToken, async (req, res) => {
+  if (req.user.user_type !== 'startup') {
+    return res.status(403).json({ message: 'Accès refusé' });
+  }
+  const id_offre = Number(req.params.id);
+  if (!Number.isInteger(id_offre) || id_offre <= 0) {
+    return res.status(400).json({ message: 'ID d\'offre invalide.' });
+  }
+
+  let connection;
+  try {
+    connection = await getDbConnection();
+    // Vérifie que l'offre appartient à la startup authentifiée
+    const [offres] = await connection.execute(
+      'SELECT id_user FROM offre WHERE id_offre = ?',
+      [id_offre]
+    );
+    if (offres.length === 0) {
+      return res.status(404).json({ message: 'Offre non trouvée.' });
+    }
+    if (offres[0].id_user !== req.user.id_user) {
+      return res.status(403).json({ message: 'Accès refusé.' });
+    }
+
+    // Récupère les candidats de l'offre
+    const [candidates] = await connection.execute(
+      `SELECT 
+        c.id_user,
+        u.email,
+        s.linkedin_url,
+        s.university,
+        s.birthday,
+        s.description,
+        c.commissions_amount,
+        c.status
+      FROM candidate c
+      JOIN studiant s ON c.id_user = s.id_user
+      JOIN user_ u ON s.id_user = u.id_user
+      WHERE c.id_offre = ?`,
+      [id_offre]
+    );
+    res.json(candidates);
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la récupération des candidats.' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
+
 // Liste d'offres avec filtres (étudiant : tout, startup : seulement ses offres)
+// Entrée: header cookie/token (JWT), query { days?, title?, comission_min?, comission_max?, price_range? }
+// Sortie: 200 [ { id_offre, title, description, startup_name, price_range, comission, created_at }, ... ] ou 403/500 { message }
 app.get('/api/offres', authenticateToken, async (req, res) => {
   const {
     days,
@@ -537,6 +615,8 @@ app.get('/api/offres', authenticateToken, async (req, res) => {
 });
 
 // Démarrage du serveur
+// Entrée: aucune
+// Sortie: log sur la console
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });
