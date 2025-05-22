@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaBars, FaTimes, FaDownload, FaMapMarkerAlt } from 'react-icons/fa';
 import { useState } from 'react';
 
-function DetailsOffer() {
+function DetailsOfferTalent() {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
   const [showApplications, setShowApplications] = useState(false);
@@ -107,8 +107,8 @@ function DetailsOffer() {
             <li className="nav-item"><a className="nav-link" href="/add-offer">Add Offers</a></li>
             <li className="nav-item"><a className="nav-link" href="#">Archive</a></li>
             <li className="nav-item"><a className="nav-link" href="/profile-startup">Profile</a></li>
-            <li className="nav-item"><a className="nav-link" href="/contact">Contact</a></li>
-            <li className="nav-item"><a className="nav-link text-danger" href="#">Logout</a></li>
+            <li className="nav-item"><a className="nav-link" href="/contact-talent">Contact</a></li>
+            <li className="nav-item"><a className="nav-link text-danger" href="talent-login">Logout</a></li>
           </ul>
         </nav>
 
@@ -162,63 +162,19 @@ function DetailsOffer() {
                 Click here to download it
               </button>
               <div className="d-flex gap-3 mt-3">
-                <button className="btn btn-warning flex-grow-1" onClick={() => navigate(`/add-offer`)}>Edit Offer</button>
-                <button className="btn btn-danger flex-grow-1" onClick={() => alert(`Offer ${offer.id} moved to archive.`)}>Send to Archive</button>
+               <button
+                className="btn btn-primary w-100 mt-2"
+                onClick={() => {
+                    alert("Applied successfully.");
+                    navigate('/talent-show-offer');
+                }}
+                >
+                Apply Now
+                </button>
+
               </div>
             </div>
-
-            <div className="d-grid">
-              <button className="btn btn-primary py-3 fw-bold" onClick={() => setShowApplications(prev => !prev)}>
-                {showApplications ? 'Hide Candidatures' : 'Show Candidatures'}
-              </button>
-            </div>
-
-            {showApplications && (
-              <section className="mt-4">
-                <h4>Candidatures</h4>
-                <div className="list-group">
-                  {applications.map(app => (
-                    <div key={app.id} className="list-group-item">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <h5 className="mb-1">{app.name}</h5>
-                        <span className={`badge ${getStatusBadgeClass(app.status)}`}>{app.status}</span>
-                      </div>
-                      <div className="mt-2 text-end">
-                        <button className="btn btn-sm btn-outline-secondary me-2" onClick={() => toggleApplicationDetails(app.id)}>
-                          {expandedApplicationId === app.id ? 'Masquer les détails' : 'Détails'}
-                        </button>
-                        {app.status === 'Pending' && (
-                          <>
-                            <button
-                              className="btn btn-sm btn-success me-2"
-                              onClick={() => handleEmailAction(app.id, app.email, 'Acceptation de votre candidature', `Bonjour ${app.name},\n\nNous avons le plaisir de vous informer que votre candidature a été acceptée.\n\nCordialement,\nL'équipe de recrutement.`, 'Approved')}
-                            >
-                              Accepter
-                            </button>
-                            <button
-                              className="btn btn-sm btn-danger"
-                              onClick={() => handleEmailAction(app.id, app.email, 'Refus de votre candidature', `Bonjour ${app.name},\n\nNous regrettons de vous informer que votre candidature n'a pas été retenue.\n\nCordialement,\nL'équipe de recrutement.`, 'Rejected')}
-                            >
-                              Rejeter
-                            </button>
-                          </>
-                        )}
-                      </div>
-                      {expandedApplicationId === app.id && (
-                        <div className="mt-3">
-                          <p><strong>Université:</strong> {app.university}</p>
-                          <p><strong>Email:</strong> <a href={`mailto:${app.email}`}>{app.email}</a></p>
-                          <p><strong>LinkedIn:</strong> <a href={app.linkedin} target="_blank" rel="noopener noreferrer">{app.linkedin}</a></p>
-                          <p><strong>Secteur:</strong> {app.secteur}</p>
-                          <p><strong>Diplôme:</strong> {app.diplome}</p>
-                          <p><strong>Langues:</strong> {app.languages}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+            
           </section>
         </main>
       </div>
@@ -226,4 +182,4 @@ function DetailsOffer() {
   );
 }
 
-export default DetailsOffer;
+export default DetailsOfferTalent;

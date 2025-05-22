@@ -15,10 +15,14 @@ import ContactPage from './screens/ContactPage';
 import ProfileStartup from './screens/ProfileStartup';
 import DetailsOffer from './screens/DetailsOffer';
 import TalentHistory from './screens/TalentHistory';
+import ProfileTalent from './screens/ProfileTalent';
+import DetailsOfferTalent from './screens/DetailsOfferTalent';
+
 
 
 import './App.css';
 import TalentShowOffers from './screens/TalentShowOffer';
+import ContactTalent from './screens/ContactTalent';
 
 
 function App() {
@@ -42,6 +46,9 @@ function App() {
           <Route path="/offer/:id" element={<DetailsOffer />} />
           <Route path="/talent-show-offer" element={<TalentShowOffers />} />
           <Route path="/talent-history" element={<TalentHistory />} />
+          <Route path="/profile-talent" element={<ProfileTalent />} />
+          <Route path="/offer-talent/:id" element={<DetailsOfferTalent />} />
+          <Route path="/contact-talent" element={<ContactTalent/>} />
 
 
         </Routes>

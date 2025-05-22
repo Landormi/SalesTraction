@@ -17,7 +17,7 @@ function StartupLogin() {
     setLoading(true);
 
     try {
-      const response = await fetch('https://s3du7.wiremockapi.cloud/api/auth/login/startup', {
+      const response = await fetch(`${import.meta.env.VITE_APP_BACK_URL}/api/auth/login/startup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

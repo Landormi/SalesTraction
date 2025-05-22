@@ -9,12 +9,13 @@ function TalentLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
-
+  const baseUrl = 'http://localhost:3000';
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch('https://s3du7.wiremockapi.cloud/login', {
+      console.log(import.meta.env.VITE_APP_BACK_URL)
+      const response = await fetch(`${import.meta.env.VITE_APP_BACK_URL}/api/auth/login/studiant`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
