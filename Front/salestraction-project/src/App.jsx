@@ -9,6 +9,7 @@ import ForgetPassword from './screens/ForgetPassword';
 import VerifyOTP from './screens/VerifyOTP';
 import CreateNewPassword from './screens/CreateNewPassword';
 import ShowOffers from './screens/ShowOffers';
+import AddOffers from './screens/AddOffers';
 
 
 import './App.css';
@@ -27,6 +28,7 @@ function App() {
           <Route path="/verify-otp" element={<VerifyOTP />} />
           <Route path="/create-new-password" element={<CreateNewPassword />} />
           <Route path="/offers" element={<ShowOffers />} />
+          <Route path="/add-offer" element={<AddOffers/>} />
         </Routes>
       </RouteHistoryProvider>
     </Router>

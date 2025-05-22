@@ -95,7 +95,7 @@ function ShowOffers() {
               <a className="nav-link" href="/offers">Home</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#">Add offer</a>
+              <a className="nav-link" href="/add-offer">Add offers</a>
             </li>
             <li className="nav-item">
               <a className="nav-link" href="#">Archive</a>
