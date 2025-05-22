@@ -1,1 +1,0 @@
-# SalesTraction Frontend
