@@ -89,7 +89,8 @@ app.post('/api/auth/signup/studiant', async (req, res) => {
     // Création de l'utilisateur
     const [userResult] = await connection.execute(
       'INSERT INTO user_ (email, password_hash, user_type) VALUES (?, ?, ?)',
-      [email, password, 'studiant']
+
+      [email, password, 'studiant'] // user_type fixé côté serveur
     );
     const userId = userResult.insertId;
     // Création du profil étudiant (clé primaire = id_user)
@@ -133,7 +134,7 @@ app.post('/api/auth/signup/startup', async (req, res) => {
     const [userResult] = await connection.execute(
       'INSERT INTO user_ (email, password_hash, user_type) VALUES (?, ?, ?)',
 
-      [email, password, 'startup']
+      [email, password, 'startup'] // user_type fixé côté serveur
     );
     const userId = userResult.insertId;
     // Création du profil startup (clé primaire = id_user)
@@ -162,12 +163,13 @@ app.post('/api/auth/login/studiant', async (req, res) => {
     connection = await getDbConnection();
     const [rows] = await connection.execute(
       'SELECT id_user, email, user_type FROM user_ WHERE email = ? AND password_hash = ? AND user_type = ?',
-      [email, password, 'studiant']
+      [email, password, 'studiant'] // user_type fixé côté serveur
     );
     if (rows.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const user = rows[0];
+    // On ne fait confiance qu'au user_type issu de la BDD (jamais du client)
     const token = generateToken(user);
     // Met le token dans un cookie HTTPOnly
     res.cookie('token', token, {
@@ -196,12 +198,13 @@ app.post('/api/auth/login/startup', async (req, res) => {
     connection = await getDbConnection();
     const [rows] = await connection.execute(
       'SELECT id_user, email, user_type FROM user_ WHERE email = ? AND password_hash = ? AND user_type = ?',
-      [email, password, 'startup']
+      [email, password, 'startup'] // user_type fixé côté serveur
     );
     if (rows.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const user = rows[0];
+    // On ne fait confiance qu'au user_type issu de la BDD (jamais du client)
     const token = generateToken(user);
     // Met le token dans un cookie HTTPOnly
     res.cookie('token', token, {
