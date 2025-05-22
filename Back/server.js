@@ -1,31 +1,31 @@
+// ===== IMPORTS =====
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
-import mysql from 'mysql2/promise'; // MariaDB client
+import mysql from 'mysql2/promise';
 import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
 import { fileURLToPath } from 'url';
 
-// Charge le bon fichier .env selon l'environnement
+// ===== CONFIGURATION ENV =====
 if (process.env.NODE_ENV === 'development') {
   dotenv.config({ path: '.env.development.local' });
 } else {
   dotenv.config();
 }
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// ===== MIDDLEWARES =====
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Swagger setup
+// ===== SWAGGER SETUP =====
 const swaggerDefinition = {
   openapi: '3.0.0',
   info: {
@@ -37,18 +37,47 @@ const swaggerDefinition = {
     { url: 'http://localhost:' + PORT }
   ]
 };
-
-// Correction ici : chemin absolu du fichier courant pour swagger-jsdoc
 const __filename = fileURLToPath(import.meta.url);
 const swaggerOptions = {
   swaggerDefinition,
-  apis: [__filename], // <-- Correction ici
+  apis: [__filename],
 };
-
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
-
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// ===== UTILS =====
+function sanitizeString(str) {
+  if (typeof str !== 'string') return '';
+  str = str.slice(0, 512);
+  return str.replace(/[<>'"`;]/g, '').trim();
+}
+async function getDbConnection() {
+  return mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT
+  });
+}
+function generateToken(user) {
+  return jwt.sign(
+    { id_user: user.id_user, email: user.email, user_type: user.user_type },
+    process.env.JWT_SECRET || 'dev_secret',
+    { expiresIn: '2h' }
+  );
+}
+function authenticateToken(req, res, next) {
+  const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Token manquant' });
+  jwt.verify(token, process.env.JWT_SECRET || 'dev_secret', (err, user) => {
+    if (err) return res.status(403).json({ message: 'Token invalide' });
+    req.user = user;
+    next();
+  });
+}
+
+// ===== SWAGGER DOCS =====
 /**
  * @swagger
  * /api/auth/signup/studiant:
@@ -358,75 +387,7 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
  *         description: Accès refusé
  */
 
-// Simple sanitize utility
-function sanitizeString(str) {
-  if (typeof str !== 'string') return '';
-  // Limite la taille à 512 caractères pour éviter les payloads trop longs
-  str = str.slice(0, 512);
-  // Retire les caractères dangereux
-  return str.replace(/[<>'"`;]/g, '').trim();
-}
-
-// Utilitaire pour créer une connexion à la BDD
-async function getDbConnection() {
-  return mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT
-  });
-}
-
-// Utilitaire pour générer un token JWT
-function generateToken(user) {
-  return jwt.sign(
-    { id_user: user.id_user, email: user.email, user_type: user.user_type },
-    process.env.JWT_SECRET || 'dev_secret',
-    { expiresIn: '2h' }
-  );
-}
-
-// Middleware pour vérifier le token JWT et attacher l'utilisateur à req.user
-function authenticateToken(req, res, next) {
-  const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'Token manquant' });
-  jwt.verify(token, process.env.JWT_SECRET || 'dev_secret', (err, user) => {
-    if (err) return res.status(403).json({ message: 'Token invalide' });
-    req.user = user;
-    next();
-  });
-}
-
-// Routes
-
-/**
- * @swagger
- * /api/auth/signup/studiant:
- *   post:
- *     summary: Inscription étudiant
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email: { type: string }
- *               password: { type: string }
- *               linkedin_url: { type: string }
- *               birthday: { type: string, format: date }
- *               university: { type: string }
- *               description: { type: string }
- *             required: [email, password, birthday]
- *     responses:
- *       201:
- *         description: Création réussie
- *       409:
- *         description: Email déjà utilisé
- *       500:
- *         description: Erreur serveur
- */
+// ===== ROUTES: AUTH =====
 // Inscription pour un étudiant
 app.post('/api/auth/signup/studiant', async (req, res) => {
   let { email, password, linkedin_url, birthday, university, description } = req.body;
@@ -471,33 +432,6 @@ app.post('/api/auth/signup/studiant', async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/auth/signup/startup:
- *   post:
- *     summary: Inscription startup
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email: { type: string }
- *               password: { type: string }
- *               linkedin_url: { type: string }
- *               name: { type: string }
- *               siret: { type: string }
- *               status: { type: string }
- *             required: [email, password, name, siret, status]
- *     responses:
- *       201:
- *         description: Création réussie
- *       409:
- *         description: Email déjà utilisé
- *       500:
- *         description: Erreur serveur
- */
 // Inscription pour une startup
 app.post('/api/auth/signup/startup', async (req, res) => {
   let { email, password, linkedin_url, name, siret, status } = req.body;
@@ -542,29 +476,6 @@ app.post('/api/auth/signup/startup', async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/auth/login/studiant:
- *   post:
- *     summary: Connexion étudiant
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email: { type: string }
- *               password: { type: string }
- *             required: [email, password]
- *     responses:
- *       200:
- *         description: Connexion réussie
- *       401:
- *         description: Identifiants invalides
- *       500:
- *         description: Erreur serveur
- */
 // Route de login pour les étudiants
 app.post('/api/auth/login/studiant', async (req, res) => {
   let { email, password } = req.body;
@@ -600,29 +511,6 @@ app.post('/api/auth/login/studiant', async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/auth/login/startup:
- *   post:
- *     summary: Connexion startup
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email: { type: string }
- *               password: { type: string }
- *             required: [email, password]
- *     responses:
- *       200:
- *         description: Connexion réussie
- *       401:
- *         description: Identifiants invalides
- *       500:
- *         description: Erreur serveur
- */
 // Route de login pour les startups
 app.post('/api/auth/login/startup', async (req, res) => {
   let { email, password } = req.body;
@@ -658,7 +546,7 @@ app.post('/api/auth/login/startup', async (req, res) => {
   }
 });
 
-// Route pour tester la connexion à la BDD
+// ===== ROUTE: DB TEST =====
 app.get('/api/db/test', async (req, res) => {
   let connection;
   try {
@@ -672,19 +560,7 @@ app.get('/api/db/test', async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/profile/studiant:
- *   get:
- *     summary: Profil étudiant
- *     responses:
- *       200:
- *         description: Profil étudiant
- *       403:
- *         description: Accès refusé
- *       404:
- *         description: Profil non trouvé
- */
+// ===== ROUTES: PROFILE =====
 // Route pour récupérer le profil étudiant (hors mot de passe)
 app.get('/api/profile/studiant', authenticateToken, async (req, res) => {
   if (req.user.user_type !== 'studiant') return res.status(403).json({ message: 'Accès refusé' });
@@ -707,19 +583,6 @@ app.get('/api/profile/studiant', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/profile/startup:
- *   get:
- *     summary: Profil startup
- *     responses:
- *       200:
- *         description: Profil startup
- *       403:
- *         description: Accès refusé
- *       404:
- *         description: Profil non trouvé
- */
 // Route pour récupérer le profil startup (hors mot de passe)
 app.get('/api/profile/startup', authenticateToken, async (req, res) => {
   if (req.user.user_type !== 'startup') return res.status(403).json({ message: 'Accès refusé' });
@@ -742,32 +605,7 @@ app.get('/api/profile/startup', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/studiant:
- *   put:
- *     summary: Modifier étudiant
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               linkedin_url: { type: string }
- *               birthday: { type: string, format: date }
- *               university: { type: string }
- *               description: { type: string }
- *     responses:
- *       200:
- *         description: Mise à jour réussie
- *       400:
- *         description: Aucune donnée à mettre à jour
- *       403:
- *         description: Accès refusé
- *       404:
- *         description: Non trouvé
- */
+// ===== ROUTES: UPDATE PROFILE =====
 // Modification d'un étudiant (id récupéré via le token)
 app.put('/api/studiant', authenticateToken, async (req, res) => {
   if (req.user.user_type !== 'studiant') return res.status(403).json({ message: 'Accès refusé' });
@@ -805,32 +643,6 @@ app.put('/api/studiant', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/startup:
- *   put:
- *     summary: Modifier startup
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               linkedin_url: { type: string }
- *               name: { type: string }
- *               siret: { type: string }
- *               status: { type: string }
- *     responses:
- *       200:
- *         description: Mise à jour réussie
- *       400:
- *         description: Aucune donnée à mettre à jour
- *       403:
- *         description: Accès refusé
- *       404:
- *         description: Non trouvé
- */
 // Modification d'une startup (id récupéré via le token)
 app.put('/api/startup', authenticateToken, async (req, res) => {
   if (req.user.user_type !== 'startup') return res.status(403).json({ message: 'Accès refusé' });
@@ -868,31 +680,7 @@ app.put('/api/startup', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/offre:
- *   post:
- *     summary: Créer une offre (startup)
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               title: { type: string }
- *               description: { type: string }
- *               price_range: { type: string }
- *               comission: { type: integer }
- *             required: [title, description, price_range, comission]
- *     responses:
- *       201:
- *         description: Offre créée
- *       400:
- *         description: Champs manquants ou invalides
- *       403:
- *         description: Accès refusé
- */
+// ===== ROUTES: OFFRE =====
 // Création d'une offre (startup uniquement)
 app.post('/api/offre', authenticateToken, async (req, res) => {
   if (req.user.user_type !== 'startup') return res.status(403).json({ message: 'Accès refusé' });
@@ -921,53 +709,6 @@ app.post('/api/offre', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/offre/{id}:
- *   get:
- *     summary: Voir une offre
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: integer }
- *     responses:
- *       200:
- *         description: Offre trouvée
- *       400:
- *         description: ID d'offre invalide
- *       403:
- *         description: Accès refusé
- *       404:
- *         description: Offre non trouvée
- *   put:
- *     summary: Modifier une offre (startup propriétaire)
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: integer }
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               title: { type: string }
- *               description: { type: string }
- *               price_range: { type: string }
- *               comission: { type: integer }
- *     responses:
- *       200:
- *         description: Offre mise à jour
- *       400:
- *         description: Aucune donnée à mettre à jour
- *       403:
- *         description: Accès refusé
- *       404:
- *         description: Offre non trouvée
- */
 // Visualisation d'une offre (étudiant ou startup propriétaire)
 app.get('/api/offre/:id', authenticateToken, async (req, res) => {
   const id_offre = Number(req.params.id);
@@ -1047,26 +788,6 @@ app.put('/api/offre/:id', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/offre/{id}/candidates:
- *   get:
- *     summary: Liste des candidats d'une offre (startup propriétaire)
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: integer }
- *     responses:
- *       200:
- *         description: Liste des candidats
- *       400:
- *         description: ID d'offre invalide
- *       403:
- *         description: Accès refusé
- *       404:
- *         description: Offre non trouvée
- */
 // Route pour récupérer les candidats d'une offre (startup propriétaire uniquement)
 app.get('/api/offre/:id/candidates', authenticateToken, async (req, res) => {
   if (req.user.user_type !== 'startup') {
@@ -1117,33 +838,6 @@ app.get('/api/offre/:id/candidates', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/offres:
- *   get:
- *     summary: Liste des offres (filtrable)
- *     parameters:
- *       - in: query
- *         name: days
- *         schema: { type: integer }
- *       - in: query
- *         name: title
- *         schema: { type: string }
- *       - in: query
- *         name: comission_min
- *         schema: { type: integer }
- *       - in: query
- *         name: comission_max
- *         schema: { type: integer }
- *       - in: query
- *         name: price_range
- *         schema: { type: string }
- *     responses:
- *       200:
- *         description: Liste des offres
- *       403:
- *         description: Accès refusé
- */
 // Liste d'offres avec filtres (étudiant : tout, startup : seulement ses offres)
 app.get('/api/offres', authenticateToken, async (req, res) => {
   const {
@@ -1220,7 +914,7 @@ app.get('/api/offres', authenticateToken, async (req, res) => {
   }
 });
 
-// Démarrage du serveur
+// ===== SERVER START =====
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });
