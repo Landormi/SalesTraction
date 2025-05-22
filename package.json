@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "bootstrap": "^5.3.6"
+    "bootstrap": "^5.3.6",
+    "classnames": "^2.5.1"
   }
 }

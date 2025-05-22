@@ -14,6 +14,7 @@ import ArchiveOffers from './screens/ArchiveOffer';
 import ContactPage from './screens/ContactPage';
 import ProfileStartup from './screens/ProfileStartup';
 import DetailsOffer from './screens/DetailsOffer';
+import TalentHistory from './screens/TalentHistory';
 
 
 import './App.css';
@@ -40,7 +41,7 @@ function App() {
           <Route path="/profile-startup" element={<ProfileStartup />} />
           <Route path="/offer/:id" element={<DetailsOffer />} />
           <Route path="/talent-show-offer" element={<TalentShowOffers />} />
-
+          <Route path="/talent-history" element={<TalentHistory />} />
 
 
         </Routes>

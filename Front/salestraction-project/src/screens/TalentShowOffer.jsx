@@ -97,16 +97,13 @@ function TalentShowOffers() {
           <h5>Menu</h5>
           <ul className="nav flex-column">
             <li className="nav-item">
-              <a className="nav-link" href="/offers">Home</a>
+              <a className="nav-link" href="/talent-show-offer">Home</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/add-offer">Add offers</a>
+              <a className="nav-link" href="/talent-history">History</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/archive-offer">Archive</a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="/profile-startup">Profile</a>
+              <a className="nav-link" href="/profile-talent">Profile</a>
             </li>
             <li className="nav-item">
               <a className="nav-link" href="/contact">Contact</a>
