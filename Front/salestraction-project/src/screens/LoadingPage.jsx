@@ -34,7 +34,7 @@ function LoadingPage() {
         <div className="d-grid gap-3 mb-4">
           <button
             className="btn btn-primary btn-lg"
-            onClick={() => navigate('/talent-login')}
+            onClick={() => navigate('/talent-show-offer')}
           >
             I am a talent commercial
           </button>
