@@ -8,9 +8,9 @@ CREATE TABLE document_type(
    PRIMARY KEY(type_document)
 );
 
-CREATE TABLE status(
-   status VARCHAR(9)  	,
-   PRIMARY KEY(status)
+CREATE TABLE status_startup(
+   status_startup VARCHAR(9)  	,
+   PRIMARY KEY(status_startup)
 );
 
 CREATE TABLE target_customer(
@@ -34,6 +34,16 @@ CREATE TABLE candidate_status(
    PRIMARY KEY(status)
 );
 
+CREATE TABLE status_offre(
+   status_offre VARCHAR(9)  	,
+   PRIMARY KEY(status_offre)
+);
+
+CREATE TABLE type_offre(
+   type_offre VARCHAR(50) ,
+   PRIMARY KEY(type_offre)
+);
+
 CREATE TABLE user_(
    id_user INT AUTO_INCREMENT Auto_increment,
    email VARCHAR(320)  NOT NULL,
@@ -49,10 +59,10 @@ CREATE TABLE startup(
    name VARCHAR(255)  NOT NULL,
    siret VARCHAR(14)  NOT NULL,
    created_at DATETIME NOT NULL,
-   status VARCHAR(9)  NOT NULL,
+   status_startup VARCHAR(9)  NOT NULL,
    PRIMARY KEY(id_user),
    FOREIGN KEY(id_user) REFERENCES user_(id_user),
-   FOREIGN KEY(status) REFERENCES status(status)
+   FOREIGN KEY(status_startup) REFERENCES status_startup(status_startup)
 );
 
 CREATE TABLE offre(
@@ -61,9 +71,12 @@ CREATE TABLE offre(
    description TEXT NOT NULL,
    price_range VARCHAR(50)  NOT NULL,
    comission INT NOT NULL,
+   created_at DATETIME NOT NULL,
    id_user INT NOT NULL,
+   status_offre VARCHAR(9)  NOT NULL,
    PRIMARY KEY(id_offre),
-   FOREIGN KEY(id_user) REFERENCES startup(id_user)
+   FOREIGN KEY(id_user) REFERENCES startup(id_user),
+   FOREIGN KEY(status_offre) REFERENCES status_offre(status_offre)
 );
 
 CREATE TABLE Document(
@@ -149,4 +162,12 @@ CREATE TABLE target_studiant(
    PRIMARY KEY(id_user, target_customer),
    FOREIGN KEY(id_user) REFERENCES studiant(id_user),
    FOREIGN KEY(target_customer) REFERENCES target_customer(target_customer)
+);
+
+CREATE TABLE Asso_19_1(
+   id_offre INT,
+   type_offre VARCHAR(50) ,
+   PRIMARY KEY(id_offre, type_offre),
+   FOREIGN KEY(id_offre) REFERENCES offre(id_offre),
+   FOREIGN KEY(type_offre) REFERENCES type_offre(type_offre)
 );
