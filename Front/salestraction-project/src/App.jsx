@@ -13,6 +13,7 @@ import AddOffers from './screens/AddOffers';
 import ArchiveOffers from './screens/ArchiveOffer';
 import ContactPage from './screens/ContactPage';
 import ProfileStartup from './screens/ProfileStartup';
+import DetailsOffer from './screens/DetailsOffer';
 
 
 import './App.css';
@@ -36,6 +37,7 @@ function App() {
           <Route path="/archive-offer" element={<ArchiveOffers/>} />
           <Route path="/contact" element={<ContactPage/>} />
           <Route path="/profile-startup" element={<ProfileStartup />} />
+          <Route path="/offer/:id" element={<DetailsOffer />} />
 
 
 

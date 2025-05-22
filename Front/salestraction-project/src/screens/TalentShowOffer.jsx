@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaSearch, FaMapMarkerAlt, FaBars, FaTimes, FaBuilding } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 
-function ShowOffers() {
+function TalentShowOffers() {
   const navigate = useNavigate();
   const [prevPage, setPrevPage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -224,7 +224,7 @@ function ShowOffers() {
                     </div>
                   </div>
                   <button className="btn btn-primary w-100 mt-2"
-                  onClick={() => handleApplyClick(offer)}>Show</button>
+                  onClick={() => handleApplyClick(offer)}>Apply</button>
                 </div>
               </div>
             </div>
@@ -235,4 +235,4 @@ function ShowOffers() {
   );
 }
 
-export default ShowOffers;
+export default TalentShowOffers;
