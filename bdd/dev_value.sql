@@ -50,8 +50,16 @@ VALUES
 (NULL, '2001-02-01', 'Université A', '2023-09-01 00:00:00', 'Description étudiant 14', 15),
 ('https://linkedin.com/in/student15', '2001-03-01', NULL, '2023-09-01 00:00:00', 'Description étudiant 15', 16);
 
+-- Ajout des statuts nécessaires dans les tables de référence
+INSERT IGNORE INTO status_startup (status_startup) VALUES
+('active');
+
+INSERT IGNORE INTO status_offre (status_offre) VALUES
+('active'),
+('close');
+
 -- Ajout des startups liées à user_
-INSERT INTO startup (linkedin_url, name, siret, created_at, status, id_user)
+INSERT INTO startup (id_user, linkedin_url, name, siret, created_at, status_startup)
 VALUES
 (NULL, 'Startup 1', '12345678901234', '2023-01-01 00:00:00', 'active', 17),
 ('https://linkedin.com/company/startup2', 'Startup 2', '22345678901234', '2023-01-01 00:00:00', 'active', 18),
@@ -59,17 +67,17 @@ VALUES
 ('https://linkedin.com/company/startup4', 'Startup 4', '42345678901234', '2023-01-01 00:00:00', 'active', 20);
 
 -- Ajout des offres pour chaque startup (1 à 2 offres par startup)
-INSERT INTO offre (title, description, price_range, comission, id_user) VALUES
+INSERT INTO offre (title, description, price_range, comission, created_at, id_user, status_offre) VALUES
 -- Startup 1 (2 offres)
-('Offre S1-1', 'Description offre 1 de Startup 1', '1000-2000', 10, 17),
-('Offre S1-2', 'Description offre 2 de Startup 1', '2000-3000', 15, 17),
+('Offre S1-1', 'Description offre 1 de Startup 1', '1000-2000', 10, '2023-02-01 00:00:00', 17, 'active'),
+('Offre S1-2', 'Description offre 2 de Startup 1', '2000-3000', 15, '2023-02-02 00:00:00', 17, 'close'),
 -- Startup 2 (1 offre)
-('Offre S2-1', 'Description offre 1 de Startup 2', '1500-2500', 12, 18),
+('Offre S2-1', 'Description offre 1 de Startup 2', '1500-2500', 12, '2023-02-03 00:00:00', 18, 'active'),
 -- Startup 3 (2 offres)
-('Offre S3-1', 'Description offre 1 de Startup 3', '1200-2200', 11, 19),
-('Offre S3-2', 'Description offre 2 de Startup 3', '2500-3500', 18, 19),
+('Offre S3-1', 'Description offre 1 de Startup 3', '1200-2200', 11, '2023-02-04 00:00:00', 19, 'active'),
+('Offre S3-2', 'Description offre 2 de Startup 3', '2500-3500', 18, '2023-02-05 00:00:00', 19, 'active'),
 -- Startup 4 (1 offre)
-('Offre S4-1', 'Description offre 1 de Startup 4', '1800-2800', 14, 20);
+('Offre S4-1', 'Description offre 1 de Startup 4', '1800-2800', 14, '2023-02-06 00:00:00', 20, 'active');
 
 -- Ajout des statuts candidats si besoin (à adapter selon la table candidate_status)
 INSERT IGNORE INTO candidate_status (status) VALUES

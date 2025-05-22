@@ -39,9 +39,9 @@ CREATE TABLE status_offre(
    PRIMARY KEY(status_offre)
 );
 
-CREATE TABLE type_offre(
-   type_offre VARCHAR(50) ,
-   PRIMARY KEY(type_offre)
+CREATE TABLE type_commision(
+   type_commision VARCHAR(50) ,
+   PRIMARY KEY(type_commision)
 );
 
 CREATE TABLE user_(
@@ -164,10 +164,10 @@ CREATE TABLE target_studiant(
    FOREIGN KEY(target_customer) REFERENCES target_customer(target_customer)
 );
 
-CREATE TABLE Asso_19_1(
+CREATE TABLE type_commision_link(
    id_offre INT,
-   type_offre VARCHAR(50) ,
-   PRIMARY KEY(id_offre, type_offre),
+   type_commision VARCHAR(50) ,
+   PRIMARY KEY(id_offre, type_commision),
    FOREIGN KEY(id_offre) REFERENCES offre(id_offre),
-   FOREIGN KEY(type_offre) REFERENCES type_offre(type_offre)
+   FOREIGN KEY(type_commision) REFERENCES type_commision(type_commision)
 );
