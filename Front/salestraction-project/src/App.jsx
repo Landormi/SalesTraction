@@ -17,6 +17,7 @@ import DetailsOffer from './screens/DetailsOffer';
 
 
 import './App.css';
+import TalentShowOffers from './screens/TalentShowOffer';
 
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
           <Route path="/contact" element={<ContactPage/>} />
           <Route path="/profile-startup" element={<ProfileStartup />} />
           <Route path="/offer/:id" element={<DetailsOffer />} />
+          <Route path="/talent-show-offer" element={<TalentShowOffers />} />
 
 
 
