@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { RouteHistoryProvider } from './RouteHistoryContext';
-import LoadingPage from './screens/Loading_page';
+import LoadingPage from './screens/LoadingPage';
 import TalentLogin from './screens/TalentLogin'; // Ajoutez cet import
 import StartupLogin from './screens/StartupLogin'; // Ajoutez cet import
 import StartupSignUp from './screens/StartupSinUp';
