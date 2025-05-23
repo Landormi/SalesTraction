@@ -23,7 +23,6 @@ import DetailsOfferTalent from './screens/DetailsOfferTalent';
 import './App.css';
 import TalentShowOffers from './screens/TalentShowOffer';
 import ContactTalent from './screens/ContactTalent';
-import StartupSerialNumber from './screens/StartupSerialNumber';
 
 
 function App() {
