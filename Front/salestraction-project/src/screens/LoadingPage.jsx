@@ -36,7 +36,7 @@ function LoadingPage() {
             className="btn btn-primary btn-lg"
             onClick={() => navigate('/talent-login')}
           >
-            I am a talent commercial
+            I am a student
           </button>
           <button
             className="btn btn-outline-primary btn-lg"
