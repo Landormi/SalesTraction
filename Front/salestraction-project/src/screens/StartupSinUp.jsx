@@ -59,7 +59,8 @@ function StartupSignUp() {
           </div>
 
           {/* Bouton Sign Up */}
-          <button className="btn btn-primary w-100 mb-3 py-2">
+          <button className="btn btn-primary w-100 mb-3 py-2"
+          onClick={() => navigate('/profile-startup')}>
             Sign Up
           </button>
 

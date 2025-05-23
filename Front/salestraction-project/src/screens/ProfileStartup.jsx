@@ -154,7 +154,7 @@ function ProfileStartup() {
           transition: 'margin 0.3s ease',
           padding: '0 15px'
         }}>
-          <div className="mb-4">
+          <div className="mb-4 text-start">
             {/* Logo Upload Circle */}
             <div className="d-flex justify-content-center mb-4">
               <div 
