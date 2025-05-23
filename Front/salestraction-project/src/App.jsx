@@ -50,7 +50,7 @@ function App() {
           <Route path="/profile-talent" element={<ProfileTalent />} />
           <Route path="/offer-talent/:id" element={<DetailsOfferTalent />} />
           <Route path="/contact-talent" element={<ContactTalent/>} />
-          <Route path="/startup-start" element={<StartupSerialNumber/>} />
+
 
 
         </Routes>
