@@ -23,7 +23,6 @@ import DetailsOfferTalent from './screens/DetailsOfferTalent';
 import './App.css';
 import TalentShowOffers from './screens/TalentShowOffer';
 import ContactTalent from './screens/ContactTalent';
-import StartupSerialNumber from './screens/StartupSerialNumber';
 
 
 function App() {
@@ -50,7 +49,7 @@ function App() {
           <Route path="/profile-talent" element={<ProfileTalent />} />
           <Route path="/offer-talent/:id" element={<DetailsOfferTalent />} />
           <Route path="/contact-talent" element={<ContactTalent/>} />
-          <Route path="/startup-start" element={<StartupSerialNumber/>} />
+
 
 
         </Routes>
