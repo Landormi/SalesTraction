@@ -38,7 +38,7 @@ SalesTraction/
 ├── bdd/                 # Scripts SQL pour la base de données
 │   ├── bdd-v1.sql
 │   ├── dev_value.sql
-│   ├── mcd.looping      # MCD (Modèle Conceptuel de Données), lisible avec Looping
+│   ├── MCD.loo     # MCD (Modèle Conceptuel de Données), lisible avec Looping
 │   └── ...
 │
 └── README.md            # Ce fichier (documentation globale)
