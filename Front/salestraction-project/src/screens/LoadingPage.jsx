@@ -40,7 +40,7 @@ function LoadingPage() {
           </button>
           <button
             className="btn btn-outline-primary btn-lg"
-            onClick={() => navigate('/startup-login')}
+            onClick={() => navigate('/startup-start')}
           >
             I am a startup
           </button>

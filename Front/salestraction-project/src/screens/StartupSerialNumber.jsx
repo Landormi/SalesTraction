@@ -6,7 +6,7 @@ import { useContext } from 'react';
 import { RouteHistoryContext } from '../RouteHistoryContext';
 
 
-function ForgetPassword() {
+function StartupSerialNumber() {
   const { previousPath } = useContext(RouteHistoryContext);
   const navigate = useNavigate();
 
@@ -31,40 +31,32 @@ function ForgetPassword() {
         </div>
         
         <div className="instruction-text mb-4">
-          <p className="text-center">Please enter your email</p>
+          <p className="text-center">Please enter your SIRET number or your name to verify</p>
         </div>
 
         <form>
-          {/* Champ Email */}
+          {/* Champ SIRET number */}
           <div className="mb-3 text-start">
-            <label className="form-label">Email</label>
+            <label className="form-label">SIRET number or name</label>
             <input 
-              type="email" 
+              type="text" 
               className="form-control" 
-              placeholder="Email" 
+              placeholder="SIRET number or name" 
             />
           </div>
 
           {/* Bouton de soumission */}
           <button 
             className="btn btn-primary w-100 mb-3 py-2"
-            onClick={() => navigate('/verify-otp')}
+            onClick={() => navigate('/startup-login')}
           >
-            Reset Password
+            Continue
           </button>
 
-          {/* Lien de retour */}
-          <div className="text-center mt-3">
-            <span className="text-muted">Remember your password?</span>{' '}
-            <Link to="/login" className="text-primary">Login</Link>
-          </div>
-          <div>
-      {/* <p>Page précédente : {previousPath || "Aucune"}</p> */}
-      </div>
         </form>
       </div>
     </div>
   );
 }
 
-export default ForgetPassword;
+export default StartupSerialNumber;
